@@ -249,7 +249,13 @@ function help_menu
 	clear
 	printf "**********************************\n* ";
 	printf "\e[1mHoney_Badger's Program Checker\e[0m *\n";
-	printf "**********************************\n\n";
+	printf "**********************************\n";
+	if [[ "$off_ver" = "" ]]
+	then
+		printf "\n";
+	else
+	printf "Update \e[92m$off_ver\e[0m available\n\n";
+	fi
 	printf "Usage: \e[91mhnorm\e[0m \e[1;95m[ \e[96m-h\e[0m | \e[92m-D\e[0m | \e[93m-u\e[0m <user> \e[35m[\e[0m<dir>\e[35m]\e[0m \e[1;95m]\e[0m\n\n";
 	printf "\e[4mExamples\e[0m:\n";
 	printf "  \e[96mhnorm -h\e[0m               -> display help\n";
@@ -263,6 +269,18 @@ function help_menu
 
 function main
 {
+	cur_ver="v.0.5"
+	off_ver=""
+	clear
+	printf "**********************************\n* ";
+	printf "\e[1mHoney_Badger's Program Checker\e[0m *\n";
+	printf "**********************************\n";
+	if [[ "$off_ver" = "" ]]
+	then
+		printf "\n";
+	else
+	printf "Update \e[92m$off_ver\e[0m available\n\n";
+	fi
 	if [[ "$1" == "-h" || "$1" == "-D" || "$1" == "-u" ]]
 	then
 		while getopts "hDu:" OPTION
@@ -296,8 +314,4 @@ function main
 	fi
 }
 
-clear
-printf "**********************************\n* ";
-printf "\e[1mHoney_Badger's Program Checker\e[0m *\n";
-printf "**********************************\n\n";
 main $@;
