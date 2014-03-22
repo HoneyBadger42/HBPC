@@ -250,11 +250,16 @@ function help_menu
 	printf "**********************************\n* ";
 	printf "\e[1mHoney_Badger's Program Checker\e[0m *\n";
 	printf "**********************************\n";
-	if [[ "$off_ver" = "" ]]
+	if [[ "$is_connected" = "" ]]
 	then
 		printf "\n";
 	else
-		printf "\e[92mUpdate available\e[0m\n\n";
+		if [[ "$off_ver" = "" ]]
+		then
+			printf "\n";
+		else
+			printf "\e[92mUpdate available\e[0m\n\n";
+		fi
 	fi
 	printf "Usage: \e[91mhnorm\e[0m \e[1;95m[ \e[96m-h\e[0m | \e[92m-D\e[0m | \e[93m-u\e[0m <user> \e[35m[\e[0m<dir>\e[35m]\e[0m \e[1;95m]\e[0m\n\n";
 	printf "\e[4mExamples\e[0m:\n";
@@ -269,17 +274,23 @@ function help_menu
 
 function main
 {
+	is_connected=$(ifconfig | grep "inet addr" | grep -v "127.0.0.1")
 	cur_ver="v.0.5"
 	off_ver=$(curl -s https://github.com/HoneyBadger42/HBPC | grep "HBPC v" | grep -v "$cur_ver")
 	clear
 	printf "**********************************\n* ";
 	printf "\e[1mHoney_Badger's Program Checker\e[0m *\n";
 	printf "**********************************\n";
-	if [[ "$off_ver" = "" ]]
+	if [[ "$is_connected" = "" ]]
 	then
 		printf "\n";
 	else
-		printf "\e[92mUpdate available\e[0m\n\n";
+		if [[ "$off_ver" = "" ]]
+		then
+			printf "\n";
+		else
+			printf "\e[92mUpdate available\e[0m\n\n";
+		fi
 	fi
 	if [[ "$1" == "-h" || "$1" == "-D" || "$1" == "-u" ]]
 	then
