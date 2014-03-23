@@ -1,4 +1,4 @@
-HBPC v.0.7
+HBPC v.0.6
 ====
 
 Premier balbutiement d'un checker de programme EN BASH, offert par la team Honey_Badger !
@@ -14,5 +14,5 @@ Vous etes en revanche chaudement invites a aider a l'amelioration de ce script, 
 Pour savoir comment ce script fonctionne, il suffit de faire un simple:
 
     hnorm -h
-    
+
 Bon divertissement ;)
