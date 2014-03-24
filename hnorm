@@ -115,6 +115,14 @@ function global_C_check
 			do
 				cif_norm $f;
 			done
+			if [ -d ./libft ]
+			then
+				cd libft ;
+				for f in *.c
+				do
+					cif_norm $f;
+				done
+			fi
 		fi
 	else
 		for f in *.c
@@ -129,6 +137,22 @@ function global_C_check
 				cif_norm $f;
 			fi
 		done
+		if [ -d ./libft ]
+		then
+			cd libft ;
+			for f in *.c
+			do
+				if [[ $(cif_norm $f) = "" ]]
+				then
+					printf "\r";
+				else
+					printf "  \033[1;91;4m"
+					printf "$f" | awk '{printf toupper($0)}';
+					printf "\033[0m:\n"
+					cif_norm $f;
+				fi
+			done
+		fi
 	fi
 }
 
@@ -305,7 +329,7 @@ function help_menu
 function main
 {
 	is_connected=$(ifconfig | grep -w "inet" | grep -v "127.0.0.1")
-	cur_ver="v.0.2"
+	cur_ver="v.0.3"
 	no_check=0
 	off_ver=$(curl -s https://github.com/HoneyBadger42/HBPC | grep "HBPC v" | grep -v "$cur_ver")
 	clear
