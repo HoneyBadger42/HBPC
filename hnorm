@@ -17,7 +17,7 @@ function cif_norm
 			user5=$(cat -n auteur | grep 5 | awk '{print $2}')
 			user6=$(cat -n auteur | grep 6 | awk '{print $2}')
 			in_auth=$(cat auteur | grep "$user")
-			h_a_a=$(cat $1 | head -n 11 | grep "$user " | grep -v "$user1" | grep -v "$user3" | grep -v "$user3" | grep -v "$user4" | grep -v "$user5" | grep -v "$user6" | wc -l | awk '{print $1}')
+			h_a_a=$(cat $1 | head -n 11 | grep "$user " | grep -v "$user2" | grep -v "$user3" | grep -v "$user4" | grep -v "$user5" | grep -v "$user6" | wc -l | awk '{print $1}')
 		fi
 		h_a=$(cat $1 | head -n 11 | grep "$user " | wc -l | awk '{print $1}')
 		if [[ "$h_a" = "3" ]]
@@ -27,7 +27,7 @@ function cif_norm
 			if [[ "$h_a_a" -ne "0" || "$in_auth" = "" ]]
 			then
 				printf "\e[1;95m   AUTHOR NAME ERROR\e[0m\n";
-				printf "\e[93m    If author is \"\e[96m$user\e[93m\", something may be wrong in the header...\e[0m\n";
+			printf "\e[93m    If author is \"\e[96m$user\e[93m\", something may be wrong in the header...\e[0m\n";
 				cat $1 | head -n 11 | grep "By: " | cut -c 2-47 | tr '*' ' ' | grep -v "$user" ;
 				cat $1 | head -n 11 | grep "by " | cut -c 2-47 | tr '*' ' ' | grep -v "$user" ;
 			else
@@ -36,8 +36,8 @@ function cif_norm
 		fi 2> /dev/null
 
 		#filename_check
-		file_check=$(cat $1 | head -n 4 | tail -n 1 | awk '{print $2}')
-		if [[ "$file" != "$file_check" ]]
+		file_check=$(cat $1 | head -n 4 | tail -n 1 | awk '{print $2}' | rev | cut -d'/' -f1 | rev)
+		if [[ `printf "$file" | rev | cut -d'/' -f1 | rev` != "$file_check" ]]
 		then
 			printf "\e[1;95m   FILENAME ERROR\e[0m\n";
 			printf "\e[93m    You file is '\e[96m$file\e[93m', but your header calls it '\e[96m$file_check\e[93m'\e[0m\n";
@@ -57,14 +57,14 @@ function cif_norm
 	cat $1 | grep "([a-zA-Z0-9 _*]*, [a-zA-Z0-9 _*]*, [a-zA-Z0-9 _*]*, [a-zA-Z0-9 _*]*," > /dev/null 2> /dev/null && ( printf "\e[1;95m   MORE THAN 4 PARAMETERS PER FUNCTION\e[0m\n" && cat $1 | grep -n "([a-zA-Z0-9 _*]*, [a-zA-Z0-9 _*]*, [a-zA-Z0-9 _*]*, [a-zA-Z0-9 _*]*," | awk '{printf "    line ", gsub(/[ |	]+/," ")}1' );
 
 	#functions number
-	num=$(printf `cat $1 | grep -w "int\|char\|void\|size_t\|t_size\|t_data\|t_set\|short\|long\|double\|float\|extern\|const\|static" | grep -v ";" | grep "(" | grep -v "[	| ]if (\|[	| ]while ("     | sed 's/(.*/()/g' | wc -l | awk '{print $1}'`)
+	num=$(printf `cat $1 | grep -w "int\|char\|void\|size_t\|t_size\|t_data\|t_set\|short\|long\|double\|float\|extern\|const\|static" | grep -v ";" | grep "(" | grep -v "[	| ]if (\|[	| ]while (" | grep -v "="| sed 's/(.*/()/g' | wc -l | awk '{print $1}'`)
 	if [[ "$num" = "5" || "$num" = "4" || "$num" = "3" || "$num" = "2" || "$num" = "1" || "$num" = "0" ]]
 	then
 		printf "\0";
 	else
 		printf "\e[1;95m   FUNCTIONS NUMBER\e[0m\e[91m is too damn high !\n";
 		printf "\e[93m    $num functions in this file\e[0m\n";
-		cat $1 | grep -w "int\|char\|void\|size_t\|t_size\|t_data\|t_set\|short\|long\|double\|float\|extern\|const\|static" | grep -v ";" | grep "(" | grep -v "[	| ]if (\|[	| ]while (" | sed 's/(.*/()/g' | awk '{printf "     \033[33m", gsub(/[	]+/,"	\033[0m")}1';
+		cat $1 | grep -w "int\|char\|void\|size_t\|t_size\|t_data\|t_set\|short\|long\|double\|float\|extern\|const\|static" | grep -v ";" | grep "(" | grep -v "[	| ]if (\|[	| ]while (" | grep -v "=" | sed 's/(.*/()/g' | awk '{printf "     \033[33m", gsub(/[	]+/,"	\033[0m")}1';
 	fi
 
 	#instruction syntax[M#S
@@ -111,21 +111,13 @@ function global_C_check
 		then
 			return;
 		else
-			for f in *.c
+			for f in `find . -name '*.c' | grep -xv '.' | grep -v ".git" | sed "s/\.\///g" `
 			do
 				cif_norm $f;
 			done
-			if [ -d ./libft ]
-			then
-				cd libft ;
-				for f in *.c
-				do
-					cif_norm $f;
-				done
-			fi
 		fi
 	else
-		for f in *.c
+		for f in `find . -name '*.c' | grep -xv '.' | grep -v ".git" | sed "s/\.\///g" `
 		do
 			if [[ $(cif_norm $f) = "" ]]
 			then
@@ -137,22 +129,6 @@ function global_C_check
 				cif_norm $f;
 			fi
 		done
-		if [ -d ./libft ]
-		then
-			cd libft ;
-			for f in *.c
-			do
-				if [[ $(cif_norm $f) = "" ]]
-				then
-					printf "\r";
-				else
-					printf "  \033[1;91;4m"
-					printf "$f" | awk '{printf toupper($0)}';
-					printf "\033[0m:\n"
-					cif_norm $f;
-				fi
-			done
-		fi
 	fi
 }
 
@@ -172,7 +148,7 @@ function norm_check
 
 function cif_cheat
 {
-	for file in *.*;
+	for file in `find . -name '*.*' | grep -xv '.' | sed "s/.\///g"` ;
 	do
 		cat $file | grep -w "<stdio.h>\|printf(\|scanf(\|puts(\|putc(\|gets(\|getc(\|system(" | grep -v "tputs(" > /dev/null 2> /dev/null && ( printf "\e[33m  $file\e[0m:\n\e[0m" && cat $file | grep -n "<stdio.h>\|printf(\|scanf(\|puts(\|putc(\|gets(\|getc(\|system(" | grep -v "tputs(" | awk '{printf "   line ", gsub(/[ |	]+/," ")}1' );
 	done 2> /dev/null
