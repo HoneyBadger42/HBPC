@@ -57,14 +57,14 @@ function cif_norm
 	cat $1 | grep "([a-zA-Z0-9 _*]*, [a-zA-Z0-9 _*]*, [a-zA-Z0-9 _*]*, [a-zA-Z0-9 _*]*," > /dev/null 2> /dev/null && ( printf "\e[1;95m   MORE THAN 4 PARAMETERS PER FUNCTION\e[0m\n" && cat $1 | grep -n "([a-zA-Z0-9 _*]*, [a-zA-Z0-9 _*]*, [a-zA-Z0-9 _*]*, [a-zA-Z0-9 _*]*," | awk '{printf "    line ", gsub(/[ |	]+/," ")}1' );
 
 	#functions number
-	num=$(printf `cat $1 | grep -x '{' | wc -l | awk '{print $1}'`)
+	num=$(printf `cat $1 | grep -w "int\|char\|void\|size_t\|t_size\|t_data\|t_set\|short\|long\|double\|float\|extern\|const\|static" | grep -v ";" | grep "(" | grep -v "[	| ]if (\|[	| ]while ("     | sed 's/(.*/()/g' | wc -l | awk '{print $1}'`)
 	if [[ "$num" = "5" || "$num" = "4" || "$num" = "3" || "$num" = "2" || "$num" = "1" ]]
 	then
 		printf "\0";
 	else
 		printf "\e[1;95m   FUNCTIONS NUMBER\e[0m\e[91m is too damn high !\n";
 		printf "\e[93m    $num functions in this file\e[0m\n";
-		cat $1 | grep -w "int\|char\|void\|size_t\|t_size\|t_data\|t_set\|short\|long\|double\|float\|extern\|const\|static" | grep -v ";" | grep "(" | sed 's/(.*/()/g' | awk '{printf "     \033[33m", gsub(/[	]+/,"	\033[0m")}1';
+		cat $1 | grep -w "int\|char\|void\|size_t\|t_size\|t_data\|t_set\|short\|long\|double\|float\|extern\|const\|static" | grep -v ";" | grep "(" | grep -v "[	| ]if (\|[	| ]while (" | sed 's/(.*/()/g' | awk '{printf "     \033[33m", gsub(/[	]+/,"	\033[0m")}1';
 	fi
 
 	#instruction syntax[M#S
@@ -316,9 +316,10 @@ function help_menu
 			printf "\e[92mUpdate available\e[0m (\e[93mhnorm -h\e[0m for more info)\n\n";
 		fi
 	fi
-	printf "Usage: \e[91mhnorm\e[0m \e[1;95m[ \e[96m-h\e[0m | \e[92m-D\e[0m | \e[93m-u\e[0m <user> \e[35m[\e[0m<dir>\e[35m]\e[0m \e[1;95m]\e[0m\n\n";
+	printf "Usage: \e[91mhnorm\e[0m \e[1;95m[ \e[96m-h\e[0m | \e[96m-v\e[0m | \e[92m-D\e[0m | \e[93m-u\e[0m <user> \e[35m[\e[0m<dir>\e[35m]\e[0m \e[1;95m]\e[0m\n\n";
 	printf "\e[4mExamples\e[0m:\n";
 	printf "  \e[96mhnorm -h\e[0m               -> display help\n";
+	printf "  \e[96mhnorm -v\e[0m               -> display current version\n";
 	printf "  \e[92mhnorm -D\e[0m               -> Download and install hnorm's update (ask rbobillo for more information)\n";
 	printf "  \e[93mhnorm\e[0m                  -> check the norm in current <dir>\n";
 	printf "  \e[93mhnorm\e[0m <dir>            -> check the norm in selected <dir>\n";
@@ -330,7 +331,7 @@ function help_menu
 function main
 {
 	is_connected=$(ifconfig | grep -w "inet" | grep -v "127.0.0.1")
-	cur_ver="v.0.0"
+	cur_ver="v.0.1"
 	no_check=0
 	off_ver=$(curl -s https://github.com/HoneyBadger42/HBPC | grep "HBPC v" | grep -v "$cur_ver")
 	clear
@@ -348,12 +349,13 @@ function main
 			printf "\e[92mUpdate available\e[0m (\e[93mhnorm -h\e[0m for more info)\n\n";
 		fi
 	fi
-	if [[ "$1" == "-h" || "$1" == "-D" || "$1" == "-u" ]]
+	if [[ "$1" == "-h" || "$1" == "-v" || "$1" == "-D" || "$1" == "-u" ]]
 	then
-		while getopts "hDu:" OPTION
+		while getopts "hvDu:" OPTION
 		do
 			case $OPTION in
 				h) help_menu ; exit 0;;
+				v) echo "Current version: $cur_ver" ; exit 0;;
 				D) download_update ; exit 0;;
 				u) if [[ "$OPTARG" != "-h" && "$OPTARG" != "-D" && "$OPTARG" != "-u" && "$OPTARG" == ${@: -1} ]]
 				then
