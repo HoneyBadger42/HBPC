@@ -40,7 +40,7 @@ function cif_norm
 		if [[ "$file" != "$file_check" ]]
 		then
 			printf "\e[1;95m   FILENAME ERROR\e[0m\n";
-			printf "\e[93m    You file is '\e[96m$file\e[93m', but your header calls it '\e[96m$file_check\e[93m'\e[0m ";
+			printf "\e[93m    You file is '\e[96m$file\e[93m', but your header calls it '\e[96m$file_check\e[93m'\e[0m\n";
 		else
 			printf "\0";
 		fi
