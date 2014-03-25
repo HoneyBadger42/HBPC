@@ -176,7 +176,14 @@ function make_check
 {
 	printf "*\e[96mCOMPILE\e[0m                  [  ..  ]"
 	make re > /dev/null 2> /dev/null &&
-		(printf "\r\e[92m*\e[0m\e[96mCOMPILE\e[0m                  [\e[92m  OK  \e[0m]\n" && make fclean > /dev/null 2> /dev/null) ||
+		(
+			if [[ `make | grep -v "make: Nothing to be done"` != "" ]]
+			then
+				printf "\r\e[91m*\e[0m\e[96mCOMPILE\e[0m                  [\e[91m  KO  \e[0m]  (\e[91mThe Makefile relinks... Bloubloublou\e[0m)\n" && make fclean > /dev/null 2> /dev/null;
+			else
+				printf "\r\e[92m*\e[0m\e[96mCOMPILE\e[0m                  [\e[92m  OK  \e[0m]\n" && make fclean > /dev/null 2> /dev/null
+			fi
+		) ||
 		(printf "\r\e[91m*\e[0m\e[96mCOMPILE\e[0m                  [\e[91m  KO  \e[0m]\n" && make fclean > /dev/null 2> /dev/null);
 	printf "\n";
 	cheat_check;
@@ -307,7 +314,7 @@ function help_menu
 function main
 {
 	is_connected=$(ifconfig | grep -w "inet" | grep -v "127.0.0.1")
-	cur_ver="v.0.1"
+	cur_ver="v.0.2"
 	no_check=0
 	off_ver=$(curl -s https://github.com/HoneyBadger42/HBPC | grep "HBPC v" | grep -v "$cur_ver")
 	clear
