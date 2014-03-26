@@ -36,7 +36,7 @@ function cif_header
 	else
 		printf "\e[1;95m   NO HEADER CORRECTLY PLACED\e[0m\n";
 		printf "\e[93m    This file's 1st line is:\e[0m ";
-		cat -e $1 | head -n 1 | awk '{gsub("\$", "\033[92m$\033[0m")}1';
+		cat $1 | head -n 1 | awk '{gsub("\$", "\033[92m$\033[0m")}1';
 	fi
 }
 
@@ -287,6 +287,8 @@ function help_menu
 	printf "**********************************\n* ";
 	printf "\e[1mHoney_Badger's Program Checker\e[0m *\n";
 	printf "**********************************\n";
+	printf "*    (\e[93mhnorm -h\e[0m for more info)    *\n";
+	printf "**********************************\n";
 	if [[ "$is_connected" = "" ]]
 	then
 		printf "\n";
@@ -295,7 +297,7 @@ function help_menu
 		then
 			printf "\n";
 		else
-			printf "\e[92mUpdate available\e[0m (\e[93mhnorm -h\e[0m for more info)\n\n";
+			printf "\e[92mUpdate available\e[0m\n\n";
 		fi
 	fi
 	printf "Usage: \e[91mhnorm\e[0m \e[1;95m[ \e[96m-h\e[0m | \e[96m-v\e[0m | \e[92m-D\e[0m | \e[93m-u\e[0m <user> \e[35m[\e[0m<dir>\e[35m]\e[0m \e[1;95m]\e[0m\n\n";
@@ -320,7 +322,8 @@ function main
 	printf "**********************************\n* ";
 	printf "\e[1mHoney_Badger's Program Checker\e[0m *\n";
 	printf "**********************************\n";
-	echo "$cur_pid"
+	printf "*    (\e[93mhnorm -h\e[0m for more info)    *\n";
+	printf "**********************************\n";
 	if [[ "$is_connected" = "" ]]
 	then
 		printf "\n";
@@ -329,7 +332,7 @@ function main
 		then
 			printf "\n";
 		else
-			printf "\e[92mUpdate available\e[0m (\e[93mhnorm -h\e[0m for more info)\n\n";
+			printf "\e[92mUpdate available\e[0m\n\n";
 		fi
 	fi
 	if [[ "$1" == "-h" || "$1" == "-v" || "$1" == "-D" || "$1" == "-u" ]]
