@@ -5,7 +5,7 @@ Premier balbutiement d'un checker de programme EN BASH, offert par la team Honey
 Il fera tout plein de trucs quand il sera fini.
 
 La norme OFFICIELLE du bocal y est implementee... Mais elle rame du boule :)
-Son UX est desormais un chouilla plus lisible !
+Son UI est desormais un chouilla plus lisible !
 
 Commencons par verifier la norme de nos *.c &Co,
 mais aussi tout ce qui concerne le fichier auteur :)
