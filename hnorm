@@ -98,7 +98,7 @@ function cif_norm
 function bocal_norm_check
 {
 	printf "\r\e[94m*\e[0m\e[96mNORM BOCAL\e[0m               ( \033[94mBOCAL MADE IT SLOW...\033[0m )\n";
-	printf "#!/bin/zsh \n" > .bocal.zsh && printf "/usr/bin/norminette \`find $dir -name \'*.*\' | grep -xv \'.\'\` | grep -v \'.git\' | grep -v \'.bocal.zsh\' | awk \'{gsub (\"Error\", \"\\033[91m         Error\\033[0m\")}1\' | awk \'{gsub (\"Norme\", \"\\033[95mNorme\\033[0m\")}1\'" >> .bocal.zsh && chmod +x .bocal.zsh && ./.bocal.zsh && rm .bocal.zsh
+	printf "#!/bin/zsh \n" > .bocal.zsh && printf "/usr/bin/norminette \`find $dir -name \'*.*\' | grep -xv \'.\'\` | grep -v \'.git\' | grep -v \'.bocal.zsh\' | awk \'{gsub (\"Error\", \"\\033[91m         Error\\033[0m\")}1\' | awk '{gsub (\"Warning\", \"\\033m[93mWarning\\033[0m\")}1\' | awk \'{gsub (\"Norme\", \"\\033[95mNorme\\033[0m\")}1\'" >> .bocal.zsh && chmod +x .bocal.zsh && ./.bocal.zsh && rm .bocal.zsh
 }
 
 function global_C_check
