@@ -262,7 +262,7 @@ function download_update
 {
 	cd $(dirname $0) ;
 	printf "\e[93m      Downloading update...\e[0m\n" ;
-	git clone https://github.com/HoneyBadger42/HBPC.git > /dev/null 2>&1 &&
+	git clone https://github.com/HoneyBadger42/HBPC.git > /dev/null 2>&1 && printf "\e[96m      Installing update...\e[0m\n" &&
 		cp HBPC/hnorm . && rm -rf HBPC && printf "\e[92m      Done !\e[0m\n\n";
 	cd - > /dev/null
 }
@@ -301,7 +301,7 @@ function help_menu
 function main
 {
 	is_connected=$(ifconfig | grep -w "inet" | grep -v "127.0.0.1")
-	cur_ver="v.0.5"
+	cur_ver="v.0.6"
 	no_check=0
 	off_ver=$(curl -s https://github.com/HoneyBadger42/HBPC | grep "HBPC v" | grep -v "$cur_ver")
 	clear
