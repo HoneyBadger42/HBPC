@@ -203,38 +203,16 @@ function make_check
 function auth_check
 {
 	printf "*\e[96mAUTHOR FILE\e[0m              [  ..  ]";
-	if [ -d src* ]
+	if [ `ls -1 | grep -w auteur | wc -l | awk '{print $1}'` = "1" ]
 	then
-		cd src*;
-		if [ -f ../auteur ]
+		if [[ `cat -e auteur | grep $user` = `echo "$user$"` ]]
 		then
-			cp ../auteur .;
-		fi
-		if [ `ls -1 | grep -w auteur | wc -l | awk '{print $1}'` = "1" ]
-		then
-			if [[ `cat -e auteur | grep $user` = `echo "$user$"` ]]
-			then
-				printf "\r\e[92m*\e[0m\e[96mAUTHOR FILE\e[0m              [\e[92m  OK  \e[0m]  (\e[96m$user\e[0m)\n";
-			else
-				printf "\r\e[91m*\e[0m\e[96mAUTHOR FILE\e[0m              [\e[91m  KO  \e[0m]  (\e[91mAuthor name fail\e[0m)\n";
-			fi
-			rm ./auteur;
-			cd ..;
+			printf "\r\e[92m*\e[0m\e[96mAUTHOR FILE\e[0m              [\e[92m  OK  \e[0m]  (\e[96m$user\e[0m)\n";
 		else
-			printf "\r\e[91m*\e[0m\e[96mAUTHOR FILE\e[0m              [\e[91m  KO  \e[0m]  (\e[91mNo author file\e[0m)\n";
+			printf "\r\e[91m*\e[0m\e[96mAUTHOR FILE\e[0m              [\e[91m  KO  \e[0m]  (\e[91mAuthor name fail\e[0m)\n";
 		fi
 	else
-		if [ `ls -1 | grep -w auteur | wc -l | awk '{print $1}'` = "1" ]
-		then
-			if [[ `cat -e auteur | grep $user` = `echo "$user$"` ]]
-			then
-				printf "\r\e[92m*\e[0m\e[96mAUTHOR FILE\e[0m              [\e[92m  OK  \e[0m]  (\e[96m$user\e[0m)\n";
-			else
-				printf "\r\e[91m*\e[0m\e[96mAUTHOR FILE\e[0m              [\e[91m  KO  \e[0m]  (\e[91mAuthor name fail\e[0m)\n";
-			fi
-		else
-			printf "\r\e[91m*\e[0m\e[96mAUTHOR FILE\e[0m              [\e[91m  KO  \e[0m]  (\e[91mNo author file\e[0m)\n";
-		fi
+		printf "\r\e[91m*\e[0m\e[96mAUTHOR FILE\e[0m              [\e[91m  KO  \e[0m]  (\e[91mNo author file\e[0m)\n";
 	fi
 	printf "\n";
 	make_check;
@@ -301,7 +279,7 @@ function help_menu
 function main
 {
 	is_connected=$(ifconfig | grep -w "inet" | grep -v "127.0.0.1")
-	cur_ver="v.0.7"
+	cur_ver="v.0.8"
 	no_check=0
 	off_ver=$(curl -s https://github.com/HoneyBadger42/HBPC | grep "HBPC v" | grep -v "$cur_ver")
 	clear
