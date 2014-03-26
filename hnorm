@@ -29,14 +29,14 @@ function cif_header
 		if [[ `printf "$file" | rev | cut -d'/' -f1 | rev` != "$file_check" ]]
 		then
 			printf "\e[1;95m   FILENAME ERROR\e[0m\n";
-			printf "\e[93m    You file is '\e[96m$file\e[93m', but your header calls it '\e[96m$file_check\e[93m'\e[0m\n";
+			printf "\e[93m    Your file is '\e[96m$file\e[93m', but your header calls it '\e[96m$file_check\e[93m'\e[0m\n";
 		else
 			printf "\0";
 		fi
 	else
 		printf "\e[1;95m   NO HEADER CORRECTLY PLACED\e[0m\n";
 		printf "\e[93m    This file's 1st line is:\e[0m ";
-		cat $1 | head -n 1 | awk '{gsub("\$", "\033[92m$\033[0m")}1';
+		cat -e $1 | head -n 1 | awk '{gsub("\$", "\033[92m$\033[0m")}1';
 	fi
 }
 
