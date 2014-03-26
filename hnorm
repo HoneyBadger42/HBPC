@@ -1,38 +1,27 @@
 #!/bin/bash
 
-function cif_norm
+function cif_header
 {
 	#header check
 	file="$1"
-	header_check=$(cat $1 | head -n 11 | tail -n 1)
-	if [[ "$header_check" = "/* ************************************************************************** */" ]]
+	header_check=$(cat $1 | head -n 11 | head -n 1)
+	header_check1=$(cat $1 | head -n 11 | tail -n 1)
+	if [[ "$header_check" = "/* ************************************************************************** */" && "$header_check1" = "/* ************************************************************************** */" ]]
 	then
 		printf "\0";
 		if [ -f auteur ]
 		then
-			user1=$(cat -n auteur | grep 1 | awk '{print $2}')
-			user2=$(cat -n auteur | grep 2 | awk '{print $2}')
-			user3=$(cat -n auteur | grep 3 | awk '{print $2}')
-			user4=$(cat -n auteur | grep 4 | awk '{print $2}')
-			user5=$(cat -n auteur | grep 5 | awk '{print $2}')
-			user6=$(cat -n auteur | grep 6 | awk '{print $2}')
-			in_auth=$(cat auteur | grep "$user")
-			h_a_a=$(cat $1 | head -n 11 | grep "$user " | grep -v "$user2" | grep -v "$user3" | grep -v "$user4" | grep -v "$user5" | grep -v "$user6" | wc -l | awk '{print $1}')
+			in_auth=$(cat auteur| tr '\n' ' ' | sed 's/ /./g' | rev | cut -c 2- | rev | sed 's/\./\\|/g')
+			user1=$(cat -n $1 | grep "By\|by" | grep -v "$in_auth")
 		fi
-		h_a=$(cat $1 | head -n 11 | grep "$user " | wc -l | awk '{print $1}')
-		if [[ "$h_a" = "3" ]]
+		h_a=$(cat $1 | head -n 11 | grep -c "$user ")
+		if [[ "$user1" != "" ]]
 		then
-			printf "\0";
+			printf "\e[1;95m   AUTHOR NAME ERROR\e[0m\n";
+			printf "\e[93m    If author is \"\e[96m$user\e[93m\", something may be wrong in the header...\e[0m\n ";
+			cat $1 | head -n 11 | grep "By\|by" | cut -c 2-47 | tr '*' ' ' | grep -v "$in_auth" ;
 		else
-			if [[ "$h_a_a" -ne "0" || "$in_auth" = "" ]]
-			then
-				printf "\e[1;95m   AUTHOR NAME ERROR\e[0m\n";
-			printf "\e[93m    If author is \"\e[96m$user\e[93m\", something may be wrong in the header...\e[0m\n";
-				cat $1 | head -n 11 | grep "By: " | cut -c 2-47 | tr '*' ' ' | grep -v "$user" ;
-				cat $1 | head -n 11 | grep "by " | cut -c 2-47 | tr '*' ' ' | grep -v "$user" ;
-			else
-				printf "\0";
-			fi
+			printf "\0";
 		fi 2> /dev/null
 
 		#filename_check
@@ -49,7 +38,10 @@ function cif_norm
 		printf "\e[93m    This file's 1st line is:\e[0m ";
 		cat -e $1 | head -n 1 | awk '{gsub("\$", "\033[92m$\033[0m")}1';
 	fi
+}
 
+function cif_norm
+{
 	#line size
 	cat $1 | sed 's/	/    /g'| grep -E "^.{81,}" > /dev/null 2> /dev/null && ( printf "\e[1;95m   MORE THAN 80 CHARS PER LINE\e[0m\n" && cat $1 | sed 's/	/    /g' | grep -nE "^.{81,}" | awk '{printf "    line ", gsub(/[ |	]+/," ")}1' );
 
@@ -80,7 +72,7 @@ function cif_norm
 	cat $1 | grep "setup (\|exit (\|fork (\|read (\|write (\|open (\|close (\|waitpid (\|creat (\|link (\|unlink (\|execve (\|chdir (\|time (\|mknod (\|chmod (\|lchown (\|break (\|oldstat (\|lseek (\|getpid (\|mount (\|umount (\|setuid (\|getuid (\|stime (\|ptrace (\|alarm (\|oldfstat (\|pause (\|utime (\|stty (\|gtty (\|access (\|nice (\|ftime (\|sync (\|kill (\|rename (\|mkdir (\|rmdir (\|dup (\|pipe (\|times (\|prof (\|brk (\|setgid (\|getgid (\|signal (\|geteuid (\|getegid (\|acct (\|umount2 (\|lock (\|ioctl (\|fcntl (\|mpx (\|setpgid (\|ulimit (\|oldolduname (\|umask (\|chroot (\|ustat (\|dup2 (\|getppid (\|getpgrp (\|setsid (\|sigaction (\|sgetmask (\|ssetmask (\|setreuid (\|setregid (\|sigsuspend (\|sigpending (\|sethostname (\|setrlimit (\|getrlimit (\|getrusage (\|gettimeofday (\|settimeofday (\|getgroups (\|setgroups (\|select (\|symlink (\|oldlstat (\|readlink (\|uselib (\|swapon (\|reboot (\|readdir (\|mmap (\|munmap (\|truncate (\|ftruncate (\|fchmod (\|fchown (\|getpriority (\|setpriority (\|profil (\|statfs (\|fstatfs (\|ioperm (\|socketcall (\|syslog (\|setitimer (\|getitimer (\|stat (\|lstat (\|fstat (\|olduname (\|iopl (\|vhangup (\|idle (\|vm86old (\|wait4 (\|swapoff (\|sysinfo (\|ipc (\|fsync (\|sigreturn (\|clone (\|setdomainname (\|uname (\|modify_ldt (\|adjtimex (\|mprotect (\|sigprocmask (\|create_module (\|init_module (\|delete_module (\|get_kernel_syms (\|quotactl (\|getpgid (\|fchdir (\|bdflush (\|sysfs (\|personality (\|afs_syscall (\|setfsuid (\|setfsgid (\|_llseek (\|getdents (\|_newselect (\|flock (\|msync (\|readv (\|writev (\|getsid (\|fdatasync (\|_sysctl (\|mlock (\|munlock (\|mlockall (\|munlockall (\|sched_setparam (\|sched_getparam (\|sched_setscheduler (\|sched_getscheduler (\|sched_yield (\|sched_get_priority_max (\|sched_get_priority_min (\|sched_rr_get_interval (\|nanosleep (\|mremap (\|setresuid (\|getresuid (\|vm86 (\|query_module (\|poll (\|nfsservctl (\|setresgid (\|getresgid (\|prctl (\|rt_sigreturn (\|rt_sigaction (\|rt_sigprocmask (\|rt_sigpending (\|rt_sigtimedwait (\|rt_sigqueueinfo (\|rt_sigsuspend (\|pread (\|pwrite (\|chown (\|getcwd (\|capget (\|capset (\|sigaltstack (\|sendfile (\|getpmsg (\|putpmsg (\|vfork (" | grep -v "setup(\|exit(\|fork(\|read(\|write(\|open(\|close(\|waitpid(\|creat(\|link(\|unlink(\|execve(\|chdir(\|time(\|mknod(\|chmod(\|lchown(\|break(\|oldstat(\|lseek(\|getpid(\|mount(\|umount(\|setuid(\|getuid(\|stime(\|ptrace(\|alarm(\|oldfstat(\|pause(\|utime(\|stty(\|gtty(\|access(\|nice(\|ftime(\|sync(\|kill(\|rename(\|mkdir(\|rmdir(\|dup(\|pipe(\|times(\|prof(\|brk(\|setgid(\|getgid(\|signal(\|geteuid(\|getegid(\|acct(\|umount2(\|lock(\|ioctl(\|fcntl(\|mpx(\|setpgid(\|ulimit(\|oldolduname(\|umask(\|chroot(\|ustat(\|dup2(\|getppid(\|getpgrp(\|setsid(\|sigaction(\|sgetmask(\|ssetmask(\|setreuid(\|setregid(\|sigsuspend(\|sigpending(\|sethostname(\|setrlimit(\|getrlimit(\|getrusage(\|gettimeofday(\|settimeofday(\|getgroups(\|setgroups(\|select(\|symlink(\|oldlstat(\|readlink(\|uselib(\|swapon(\|reboot(\|readdir(\|mmap(\|munmap(\|truncate(\|ftruncate(\|fchmod(\|fchown(\|getpriority(\|setpriority(\|profil(\|statfs(\|fstatfs(\|ioperm(\|socketcall(\|syslog(\|setitimer(\|getitimer(\|stat(\|lstat(\|fstat(\|olduname(\|iopl(\|vhangup(\|idle(\|vm86old(\|wait4(\|swapoff(\|sysinfo(\|ipc(\|fsync(\|sigreturn(\|clone(\|setdomainname(\|uname(\|modify_ldt(\|adjtimex(\|mprotect(\|sigprocmask(\|create_module(\|init_module(\|delete_module(\|get_kernel_syms(\|quotactl(\|getpgid(\|fchdir(\|bdflush(\|sysfs(\|personality(\|afs_syscall(\|setfsuid(\|setfsgid(\|_llseek(\|getdents(\|_newselect(\|flock(\|msync(\|readv(\|writev(\|getsid(\|fdatasync(\|_sysctl(\|mlock(\|munlock(\|mlockall(\|munlockall(\|sched_setparam(\|sched_getparam(\|sched_setscheduler(\|sched_getscheduler(\|sched_yield(\|sched_get_priority_max(\|sched_get_priority_min(\|sched_rr_get_interval(\|nanosleep(\|mremap(\|setresuid(\|getresuid(\|vm86(\|query_module(\|poll(\|nfsservctl(\|setresgid(\|getresgid(\|prctl(\|rt_sigreturn(\|rt_sigaction(\|rt_sigprocmask(\|rt_sigpending(\|rt_sigtimedwait(\|rt_sigqueueinfo(\|rt_sigsuspend(\|pread(\|pwrite(\|chown(\|getcwd(\|capget(\|capset(\|sigaltstack(\|sendfile(\|getpmsg(\|putpmsg(\|vfork(" > /dev/null 2> /dev/null && ( printf "\e[1;95m   SYSTEM CALLS SYNTAX\e[0m (\e[91mA space before the bracket hurts my feelings !\e[0m)\n" && cat $1 | grep -n "setup (\|exit (\|fork (\|read (\|write (\|open (\|close (\|waitpid (\|creat (\|link (\|unlink (\|execve (\|chdir (\|time (\|mknod (\|chmod (\|lchown (\|break (\|oldstat (\|lseek (\|getpid (\|mount (\|umount (\|setuid (\|getuid (\|stime (\|ptrace (\|alarm (\|oldfstat (\|pause (\|utime (\|stty (\|gtty (\|access (\|nice (\|ftime (\|sync (\|kill (\|rename (\|mkdir (\|rmdir (\|dup (\|pipe (\|times (\|prof (\|brk (\|setgid (\|getgid (\|signal (\|geteuid (\|getegid (\|acct (\|umount2 (\|lock (\|ioctl (\|fcntl (\|mpx (\|setpgid (\|ulimit (\|oldolduname (\|umask (\|chroot (\|ustat (\|dup2 (\|getppid (\|getpgrp (\|setsid (\|sigaction (\|sgetmask (\|ssetmask (\|setreuid (\|setregid (\|sigsuspend (\|sigpending (\|sethostname (\|setrlimit (\|getrlimit (\|getrusage (\|gettimeofday (\|settimeofday (\|getgroups (\|setgroups (\|select (\|symlink (\|oldlstat (\|readlink (\|uselib (\|swapon (\|reboot (\|readdir (\|mmap (\|munmap (\|truncate (\|ftruncate (\|fchmod (\|fchown (\|getpriority (\|setpriority (\|profil (\|statfs (\|fstatfs (\|ioperm (\|socketcall (\|syslog (\|setitimer (\|getitimer (\|stat (\|lstat (\|fstat (\|olduname (\|iopl (\|vhangup (\|idle (\|vm86old (\|wait4 (\|swapoff (\|sysinfo (\|ipc (\|fsync (\|sigreturn (\|clone (\|setdomainname (\|uname (\|modify_ldt (\|adjtimex (\|mprotect (\|sigprocmask (\|create_module (\|init_module (\|delete_module (\|get_kernel_syms (\|quotactl (\|getpgid (\|fchdir (\|bdflush (\|sysfs (\|personality (\|afs_syscall (\|setfsuid (\|setfsgid (\|_llseek (\|getdents (\|_newselect (\|flock (\|msync (\|readv (\|writev (\|getsid (\|fdatasync (\|_sysctl (\|mlock (\|munlock (\|mlockall (\|munlockall (\|sched_setparam (\|sched_getparam (\|sched_setscheduler (\|sched_getscheduler (\|sched_yield (\|sched_get_priority_max (\|sched_get_priority_min (\|sched_rr_get_interval (\|nanosleep (\|mremap (\|setresuid (\|getresuid (\|vm86 (\|query_module (\|poll (\|nfsservctl (\|setresgid (\|getresgid (\|prctl (\|rt_sigreturn (\|rt_sigaction (\|rt_sigprocmask (\|rt_sigpending (\|rt_sigtimedwait (\|rt_sigqueueinfo (\|rt_sigsuspend (\|pread (\|pwrite (\|chown (\|getcwd (\|capget (\|capset (\|sigaltstack (\|sendfile (\|getpmsg (\|putpmsg (\|vfork (" | grep -v "setup(\|exit(\|fork(\|read(\|write(\|open(\|close(\|waitpid(\|creat(\|link(\|unlink(\|execve(\|chdir(\|time(\|mknod(\|chmod(\|lchown(\|break(\|oldstat(\|lseek(\|getpid(\|mount(\|umount(\|setuid(\|getuid(\|stime(\|ptrace(\|alarm(\|oldfstat(\|pause(\|utime(\|stty(\|gtty(\|access(\|nice(\|ftime(\|sync(\|kill(\|rename(\|mkdir(\|rmdir(\|dup(\|pipe(\|times(\|prof(\|brk(\|setgid(\|getgid(\|signal(\|geteuid(\|getegid(\|acct(\|umount2(\|lock(\|ioctl(\|fcntl(\|mpx(\|setpgid(\|ulimit(\|oldolduname(\|umask(\|chroot(\|ustat(\|dup2(\|getppid(\|getpgrp(\|setsid(\|sigaction(\|sgetmask(\|ssetmask(\|setreuid(\|setregid(\|sigsuspend(\|sigpending(\|sethostname(\|setrlimit(\|getrlimit(\|getrusage(\|gettimeofday(\|settimeofday(\|getgroups(\|setgroups(\|select(\|symlink(\|oldlstat(\|readlink(\|uselib(\|swapon(\|reboot(\|readdir(\|mmap(\|munmap(\|truncate(\|ftruncate(\|fchmod(\|fchown(\|getpriority(\|setpriority(\|profil(\|statfs(\|fstatfs(\|ioperm(\|socketcall(\|syslog(\|setitimer(\|getitimer(\|stat(\|lstat(\|fstat(\|olduname(\|iopl(\|vhangup(\|idle(\|vm86old(\|wait4(\|swapoff(\|sysinfo(\|ipc(\|fsync(\|sigreturn(\|clone(\|setdomainname(\|uname(\|modify_ldt(\|adjtimex(\|mprotect(\|sigprocmask(\|create_module(\|init_module(\|delete_module(\|get_kernel_syms(\|quotactl(\|getpgid(\|fchdir(\|bdflush(\|sysfs(\|personality(\|afs_syscall(\|setfsuid(\|setfsgid(\|_llseek(\|getdents(\|_newselect(\|flock(\|msync(\|readv(\|writev(\|getsid(\|fdatasync(\|_sysctl(\|mlock(\|munlock(\|mlockall(\|munlockall(\|sched_setparam(\|sched_getparam(\|sched_setscheduler(\|sched_getscheduler(\|sched_yield(\|sched_get_priority_max(\|sched_get_priority_min(\|sched_rr_get_interval(\|nanosleep(\|mremap(\|setresuid(\|getresuid(\|vm86(\|query_module(\|poll(\|nfsservctl(\|setresgid(\|getresgid(\|prctl(\|rt_sigreturn(\|rt_sigaction(\|rt_sigprocmask(\|rt_sigpending(\|rt_sigtimedwait(\|rt_sigqueueinfo(\|rt_sigsuspend(\|pread(\|pwrite(\|chown(\|getcwd(\|capget(\|capset(\|sigaltstack(\|sendfile(\|getpmsg(\|putpmsg(\|vfork(" | awk '{printf "    line ", gsub(/[ |	]+/," ")}1' );
 
 	#malloc cast
-	cat $1 | grep "= malloc" > /dev/null 2> /dev/null && ( printf "\e[1;95m   MALLOC NOT CAST\e[0m\e[91m you fool !\e[0m\n" && cat $1 | grep -n "= malloc" | awk '{printf "    line ", gsub(/[ |	]+/," ")}1' );
+#	cat $1 | grep "= malloc" > /dev/null 2> /dev/null && ( printf "\e[1;95m   MALLOC NOT CAST\e[0m\e[91m you fool !\e[0m\n" && cat $1 | grep -n "= malloc" | awk '{printf "    line ", gsub(/[ |	]+/," ")}1' );
 
 	#illegal comments
 	cat $1 | grep "//" > /dev/null 2> /dev/null && ( printf "\e[1;95m   C++ COMMENTS\e[0m\n" && cat $1 | grep -n "//" | awk '{printf "    line ", gsub(/[ |	]+/," ")}1' );
@@ -135,12 +127,12 @@ function global_C_check
 function norm_check
 {
 	file_path=$(pwd | sed "s|$HOME|~|g")
-	printf "*\e[96mNORM *.c\e[0m                 [  ..  ]  (\033[96m`printf "$file_path"`\033[0m)";
+	printf "*\e[96mNORM HB\e[0m                  [  ..  ]  (\033[96m`printf "$file_path"`\033[0m)";
 	if [[ $(global_C_check "check") = "" ]]
 	then
-		printf "\r\e[92m*\e[0m\e[96mNORM *.c\e[0m                 [  \e[92mOK\e[0m  ]  (\033[96m`printf "$file_path"`\033[0m)\n";
+		printf "\r\e[92m*\e[0m\e[96mNORM HB\e[0m                  [  \e[92mOK\e[0m  ]  (\033[96m`printf "$file_path"`\033[0m)\n";
 	else
-		printf "\r\e[91m*\e[0m\e[96mNORM *.c\e[0m                 [  \e[91mKO\e[0m  ]  (\033[96m`printf "$file_path"`\033[0m)\n";
+		printf "\r\e[91m*\e[0m\e[96mNORM HB\e[0m                  [  \e[91mKO\e[0m  ]  (\033[96m`printf "$file_path"`\033[0m)\n";
 		global_C_check "display";
 	fi
 	printf "\n";
@@ -148,9 +140,16 @@ function norm_check
 
 function cif_cheat
 {
-	for file in `find . -name '*.*' | grep -xv '.' | sed "s/.\///g"` ;
+	for file in `find . -name '*.[c|h]' | grep -xv '.' | sed "s/\.\///g"` ;
 	do
 		cat $file | grep -w "<stdio.h>\|printf(\|scanf(\|puts(\|putc(\|gets(\|getc(\|system(" | grep -v "tputs(" > /dev/null 2> /dev/null && ( printf "\e[33m  $file\e[0m:\n\e[0m" && cat $file | grep -n "<stdio.h>\|printf(\|scanf(\|puts(\|putc(\|gets(\|getc(\|system(" | grep -v "tputs(" | awk '{printf "   line ", gsub(/[ |	]+/," ")}1' );
+		if [[ `cif_header $file 2> /dev/null` = "" ]]
+		then
+			printf "\0";
+		else
+			printf "  \e[91;4m" ; printf "$file" | awk '{print toupper($0)}' ; printf "\e[0m" ;
+			cif_header $file;
+		fi
 	done 2> /dev/null
 }
 
@@ -160,12 +159,12 @@ function cheat_check
 	then
 		cd src*;
 	fi
-	printf "*\e[96mFORBIDDEN\e[0m                [  ..  ]";
+	printf "*\e[96mDANGER\e[0m                   [  ..  ]";
 	if [[ $(cif_cheat) = "" ]]
 	then
-		printf "\r\e[92m*\e[0m\e[96mFORBIDDEN\e[0m                [\e[92m  OK  \e[0m]\n";
+		printf "\r\e[92m*\e[0m\e[96mDANGER\e[0m                   [\e[92m  OK  \e[0m]\n";
 	else
-		printf "\r\e[93m*\e[0m\e[96mFORBIDDEN\e[0m                [\e[93m WARN \e[0m]\n";
+		printf "\r\e[93m*\e[0m\e[96mDANGER\e[0m                   [\e[93m WARN \e[0m]\n";
 		cif_cheat;
 	fi
 	printf "\n";
@@ -314,13 +313,14 @@ function help_menu
 function main
 {
 	is_connected=$(ifconfig | grep -w "inet" | grep -v "127.0.0.1")
-	cur_ver="v.0.2"
+	cur_ver="v.0.3"
 	no_check=0
 	off_ver=$(curl -s https://github.com/HoneyBadger42/HBPC | grep "HBPC v" | grep -v "$cur_ver")
 	clear
 	printf "**********************************\n* ";
 	printf "\e[1mHoney_Badger's Program Checker\e[0m *\n";
 	printf "**********************************\n";
+	echo "$cur_pid"
 	if [[ "$is_connected" = "" ]]
 	then
 		printf "\n";
