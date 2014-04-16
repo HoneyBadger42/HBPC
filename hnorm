@@ -181,7 +181,7 @@ function help_menu
 function main
 {
 	is_connected=$(ifconfig | grep -w "inet" | grep -v "127.0.0.1")
-	cur_ver="v.1.0"
+	cur_ver="v.1.1"
 	no_check=0
 	off_ver=$(curl -s https://github.com/HoneyBadger42/HBPC | grep "HBPC v" | grep -v "$cur_ver")
 	clear
