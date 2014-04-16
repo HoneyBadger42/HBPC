@@ -40,108 +40,14 @@ function cif_header
 	fi
 }
 
-function cif_norm
-{
-	#line size
-	cat $1 | sed 's/	/    /g'| grep -E "^.{81,}" > /dev/null 2> /dev/null && ( printf "\e[1;95m   MORE THAN 80 CHARS PER LINE\e[0m\n" && cat $1 | sed 's/	/    /g' | grep -nE "^.{81,}" | awk '{printf "    line ", gsub(/[ |	]+/," ")}1' );
-
-	#function parameters
-	cat $1 | grep "([a-zA-Z0-9 _*]*, [a-zA-Z0-9 _*]*, [a-zA-Z0-9 _*]*, [a-zA-Z0-9 _*]*," > /dev/null 2> /dev/null && ( printf "\e[1;95m   MORE THAN 4 PARAMETERS PER FUNCTION\e[0m\n" && cat $1 | grep -n "([a-zA-Z0-9 _*]*, [a-zA-Z0-9 _*]*, [a-zA-Z0-9 _*]*, [a-zA-Z0-9 _*]*," | awk '{printf "    line ", gsub(/[ |	]+/," ")}1' );
-
-	#functions number
-	num=$(printf `cat $1 | grep -w "int\|char\|void\|size_t\|t_size\|t_data\|t_set\|short\|long\|double\|float\|extern\|const\|static" | grep -v ";" | grep "(" | grep -v "[	| ]if (\|[	| ]while (" | grep -v "="| sed 's/(.*/()/g' | wc -l | awk '{print $1}'`)
-	if [[ "$num" = "5" || "$num" = "4" || "$num" = "3" || "$num" = "2" || "$num" = "1" || "$num" = "0" ]]
-	then
-		printf "\0";
-	else
-		printf "\e[1;95m   FUNCTIONS NUMBER\e[0m\e[91m is too damn high !\n";
-		printf "\e[93m    $num functions in this file\e[0m\n";
-		cat $1 | grep -w "int\|char\|void\|size_t\|t_size\|t_data\|t_set\|short\|long\|double\|float\|extern\|const\|static" | grep -v ";" | grep "(" | grep -v "[	| ]if (\|[	| ]while (" | grep -v "=" | sed 's/(.*/()/g' | awk '{printf "     \033[33m", gsub(/[	]+/,"	\033[0m")}1';
-	fi
-
-	#instruction syntax[M#S
-	cat $1 | grep " ;" | grep -v "return ;" | grep -v "break ;" | grep -v "continue ;" > /dev/null 2> /dev/null && ( printf "\e[1;95m   SPACE BEFORE INSTRUCTION END\e[0m\n" && cat $1 | grep -n " ;" | grep -v "return ;" | grep -v "break ;" | grep -v "continue ;" | awk '{printf "    line ", gsub(/[ |	]+/," ")}1' );
-
-	#keywords syntax
-	cat $1 | grep "[	| ]if(\|[	| ]else if(\|[	| ]while(\|[	| ]return\|[	| ]sizeof" | grep -v "sizeof(" | grep -v "return (" | grep -v "return ;" > /dev/null 2> /dev/null && ( printf "\e[1;95m   KEYWORDS SPACING\e[0m\n" && cat $1 | grep -n "[	| ]if(\|[	| ]else if(\|[	| ]while(\|[	| ]return\|[	| ]sizeof" | grep -v "sizeof(" | grep -v "return (" | grep -v "return ;" | awk '{printf "    line ", gsub(/[ |	]+/," "), gsub("sizeof", "\033[91msizeof\033[0m"), gsub("if", "\033[91mif\033[0m"), gsub("else if", "\033[91melse if\033[0m"), gsub("while", "\033[91mwhile\033[0m"), gsub("return", "\033[91mreturn\033[0m")}1' );
-
-	#function syntax
-	cat $1 | grep "[a-zA-Z0-9_]* (" | grep -v "[a-zA-Z0-9_](" | grep -v "if\|else if\|while\|return\|sizeof\|for\|case\|switch" | grep -v "= (\|< (\|> (\|/ (\|* (\|+ (\|- (\|% (\|| (\|& (\|)-" | grep -v "setup (\|exit (\|fork (\|read (\|write (\|open (\|close (\|waitpid (\|creat (\|link (\|unlink (\|execve (\|chdir (\|time (\|mknod (\|chmod (\|lchown (\|break (\|oldstat (\|lseek (\|getpid (\|mount (\|umount (\|setuid (\|getuid (\|stime (\|ptrace (\|alarm (\|oldfstat (\|pause (\|utime (\|stty (\|gtty (\|access (\|nice (\|ftime (\|sync (\|kill (\|rename (\|mkdir (\|rmdir (\|dup (\|pipe (\|times (\|prof (\|brk (\|setgid (\|getgid (\|signal (\|geteuid (\|getegid (\|acct (\|umount2 (\|lock (\|ioctl (\|fcntl (\|mpx (\|setpgid (\|ulimit (\|oldolduname (\|umask (\|chroot (\|ustat (\|dup2 (\|getppid (\|getpgrp (\|setsid (\|sigaction (\|sgetmask (\|ssetmask (\|setreuid (\|setregid (\|sigsuspend (\|sigpending (\|sethostname (\|setrlimit (\|getrlimit (\|getrusage (\|gettimeofday (\|settimeofday (\|getgroups (\|setgroups (\|select (\|symlink (\|oldlstat (\|readlink (\|uselib (\|swapon (\|reboot (\|readdir (\|mmap (\|munmap (\|truncate (\|ftruncate (\|fchmod (\|fchown (\|getpriority (\|setpriority (\|profil (\|statfs (\|fstatfs (\|ioperm (\|socketcall (\|syslog (\|setitimer (\|getitimer (\|stat (\|lstat (\|fstat (\|olduname (\|iopl (\|vhangup (\|idle (\|vm86old (\|wait4 (\|swapoff (\|sysinfo (\|ipc (\|fsync (\|sigreturn (\|clone (\|setdomainname (\|uname (\|modify_ldt (\|adjtimex (\|mprotect (\|sigprocmask (\|create_module (\|init_module (\|delete_module (\|get_kernel_syms (\|quotactl (\|getpgid (\|fchdir (\|bdflush (\|sysfs (\|personality (\|afs_syscall (\|setfsuid (\|setfsgid (\|_llseek (\|getdents (\|_newselect (\|flock (\|msync (\|readv (\|writev (\|getsid (\|fdatasync (\|_sysctl (\|mlock (\|munlock (\|mlockall (\|munlockall (\|sched_setparam (\|sched_getparam (\|sched_setscheduler (\|sched_getscheduler (\|sched_yield (\|sched_get_priority_max (\|sched_get_priority_min (\|sched_rr_get_interval (\|nanosleep (\|mremap (\|setresuid (\|getresuid (\|vm86 (\|query_module (\|poll (\|nfsservctl (\|setresgid (\|getresgid (\|prctl (\|rt_sigreturn (\|rt_sigaction (\|rt_sigprocmask (\|rt_sigpending (\|rt_sigtimedwait (\|rt_sigqueueinfo (\|rt_sigsuspend (\|pread (\|pwrite (\|chown (\|getcwd (\|capget (\|capset (\|sigaltstack (\|sendfile (\|getpmsg (\|putpmsg (\|vfork (" > /dev/null 2>&1 && ( printf "\e[1;95m   FUNCTIONS SYNTAX\e[0m \e[93m(NO SPACE BEFORE A BRACKET !! But you better check it by yourself MOFO !)\e[0m\n" && cat $1 | grep -n "[a-zA-Z0-9_]* (" | grep -v "[a-zA-Z0-9_](" | grep -v "if\|else if\|while\|return\|sizeof\|for\|case\|switch" | grep -v "= (\|< (\|> (\|/ (\|* (\|+ (\|- (\|% (\|| (\|& (\|)-" | grep -v "setup (\|exit (\|fork (\|read (\|write (\|open (\|close (\|waitpid (\|creat (\|link (\|unlink (\|execve (\|chdir (\|time (\|mknod (\|chmod (\|lchown (\|break (\|oldstat (\|lseek (\|getpid (\|mount (\|umount (\|setuid (\|getuid (\|stime (\|ptrace (\|alarm (\|oldfstat (\|pause (\|utime (\|stty (\|gtty (\|access (\|nice (\|ftime (\|sync (\|kill (\|rename (\|mkdir (\|rmdir (\|dup (\|pipe (\|times (\|prof (\|brk (\|setgid (\|getgid (\|signal (\|geteuid (\|getegid (\|acct (\|umount2 (\|lock (\|ioctl (\|fcntl (\|mpx (\|setpgid (\|ulimit (\|oldolduname (\|umask (\|chroot (\|ustat (\|dup2 (\|getppid (\|getpgrp (\|setsid (\|sigaction (\|sgetmask (\|ssetmask (\|setreuid (\|setregid (\|sigsuspend (\|sigpending (\|sethostname (\|setrlimit (\|getrlimit (\|getrusage (\|gettimeofday (\|settimeofday (\|getgroups (\|setgroups (\|select (\|symlink (\|oldlstat (\|readlink (\|uselib (\|swapon (\|reboot (\|readdir (\|mmap (\|munmap (\|truncate (\|ftruncate (\|fchmod (\|fchown (\|getpriority (\|setpriority (\|profil (\|statfs (\|fstatfs (\|ioperm (\|socketcall (\|syslog (\|setitimer (\|getitimer (\|stat (\|lstat (\|fstat (\|olduname (\|iopl (\|vhangup (\|idle (\|vm86old (\|wait4 (\|swapoff (\|sysinfo (\|ipc (\|fsync (\|sigreturn (\|clone (\|setdomainname (\|uname (\|modify_ldt (\|adjtimex (\|mprotect (\|sigprocmask (\|create_module (\|init_module (\|delete_module (\|get_kernel_syms (\|quotactl (\|getpgid (\|fchdir (\|bdflush (\|sysfs (\|personality (\|afs_syscall (\|setfsuid (\|setfsgid (\|_llseek (\|getdents (\|_newselect (\|flock (\|msync (\|readv (\|writev (\|getsid (\|fdatasync (\|_sysctl (\|mlock (\|munlock (\|mlockall (\|munlockall (\|sched_setparam (\|sched_getparam (\|sched_setscheduler (\|sched_getscheduler (\|sched_yield (\|sched_get_priority_max (\|sched_get_priority_min (\|sched_rr_get_interval (\|nanosleep (\|mremap (\|setresuid (\|getresuid (\|vm86 (\|query_module (\|poll (\|nfsservctl (\|setresgid (\|getresgid (\|prctl (\|rt_sigreturn (\|rt_sigaction (\|rt_sigprocmask (\|rt_sigpending (\|rt_sigtimedwait (\|rt_sigqueueinfo (\|rt_sigsuspend (\|pread (\|pwrite (\|chown (\|getcwd (\|capget (\|capset (\|sigaltstack (\|sendfile (\|getpmsg (\|putpmsg (\|vfork (" | awk '{printf "    line ", gsub(/[ |	]+/," ")}1' );
-
-	#system calls syntax
-	cat $1 | grep "setup (\|exit (\|fork (\|read (\|write (\|open (\|close (\|waitpid (\|creat (\|link (\|unlink (\|execve (\|chdir (\|time (\|mknod (\|chmod (\|lchown (\|break (\|oldstat (\|lseek (\|getpid (\|mount (\|umount (\|setuid (\|getuid (\|stime (\|ptrace (\|alarm (\|oldfstat (\|pause (\|utime (\|stty (\|gtty (\|access (\|nice (\|ftime (\|sync (\|kill (\|rename (\|mkdir (\|rmdir (\|dup (\|pipe (\|times (\|prof (\|brk (\|setgid (\|getgid (\|signal (\|geteuid (\|getegid (\|acct (\|umount2 (\|lock (\|ioctl (\|fcntl (\|mpx (\|setpgid (\|ulimit (\|oldolduname (\|umask (\|chroot (\|ustat (\|dup2 (\|getppid (\|getpgrp (\|setsid (\|sigaction (\|sgetmask (\|ssetmask (\|setreuid (\|setregid (\|sigsuspend (\|sigpending (\|sethostname (\|setrlimit (\|getrlimit (\|getrusage (\|gettimeofday (\|settimeofday (\|getgroups (\|setgroups (\|select (\|symlink (\|oldlstat (\|readlink (\|uselib (\|swapon (\|reboot (\|readdir (\|mmap (\|munmap (\|truncate (\|ftruncate (\|fchmod (\|fchown (\|getpriority (\|setpriority (\|profil (\|statfs (\|fstatfs (\|ioperm (\|socketcall (\|syslog (\|setitimer (\|getitimer (\|stat (\|lstat (\|fstat (\|olduname (\|iopl (\|vhangup (\|idle (\|vm86old (\|wait4 (\|swapoff (\|sysinfo (\|ipc (\|fsync (\|sigreturn (\|clone (\|setdomainname (\|uname (\|modify_ldt (\|adjtimex (\|mprotect (\|sigprocmask (\|create_module (\|init_module (\|delete_module (\|get_kernel_syms (\|quotactl (\|getpgid (\|fchdir (\|bdflush (\|sysfs (\|personality (\|afs_syscall (\|setfsuid (\|setfsgid (\|_llseek (\|getdents (\|_newselect (\|flock (\|msync (\|readv (\|writev (\|getsid (\|fdatasync (\|_sysctl (\|mlock (\|munlock (\|mlockall (\|munlockall (\|sched_setparam (\|sched_getparam (\|sched_setscheduler (\|sched_getscheduler (\|sched_yield (\|sched_get_priority_max (\|sched_get_priority_min (\|sched_rr_get_interval (\|nanosleep (\|mremap (\|setresuid (\|getresuid (\|vm86 (\|query_module (\|poll (\|nfsservctl (\|setresgid (\|getresgid (\|prctl (\|rt_sigreturn (\|rt_sigaction (\|rt_sigprocmask (\|rt_sigpending (\|rt_sigtimedwait (\|rt_sigqueueinfo (\|rt_sigsuspend (\|pread (\|pwrite (\|chown (\|getcwd (\|capget (\|capset (\|sigaltstack (\|sendfile (\|getpmsg (\|putpmsg (\|vfork (" | grep -v "setup(\|exit(\|fork(\|read(\|write(\|open(\|close(\|waitpid(\|creat(\|link(\|unlink(\|execve(\|chdir(\|time(\|mknod(\|chmod(\|lchown(\|break(\|oldstat(\|lseek(\|getpid(\|mount(\|umount(\|setuid(\|getuid(\|stime(\|ptrace(\|alarm(\|oldfstat(\|pause(\|utime(\|stty(\|gtty(\|access(\|nice(\|ftime(\|sync(\|kill(\|rename(\|mkdir(\|rmdir(\|dup(\|pipe(\|times(\|prof(\|brk(\|setgid(\|getgid(\|signal(\|geteuid(\|getegid(\|acct(\|umount2(\|lock(\|ioctl(\|fcntl(\|mpx(\|setpgid(\|ulimit(\|oldolduname(\|umask(\|chroot(\|ustat(\|dup2(\|getppid(\|getpgrp(\|setsid(\|sigaction(\|sgetmask(\|ssetmask(\|setreuid(\|setregid(\|sigsuspend(\|sigpending(\|sethostname(\|setrlimit(\|getrlimit(\|getrusage(\|gettimeofday(\|settimeofday(\|getgroups(\|setgroups(\|select(\|symlink(\|oldlstat(\|readlink(\|uselib(\|swapon(\|reboot(\|readdir(\|mmap(\|munmap(\|truncate(\|ftruncate(\|fchmod(\|fchown(\|getpriority(\|setpriority(\|profil(\|statfs(\|fstatfs(\|ioperm(\|socketcall(\|syslog(\|setitimer(\|getitimer(\|stat(\|lstat(\|fstat(\|olduname(\|iopl(\|vhangup(\|idle(\|vm86old(\|wait4(\|swapoff(\|sysinfo(\|ipc(\|fsync(\|sigreturn(\|clone(\|setdomainname(\|uname(\|modify_ldt(\|adjtimex(\|mprotect(\|sigprocmask(\|create_module(\|init_module(\|delete_module(\|get_kernel_syms(\|quotactl(\|getpgid(\|fchdir(\|bdflush(\|sysfs(\|personality(\|afs_syscall(\|setfsuid(\|setfsgid(\|_llseek(\|getdents(\|_newselect(\|flock(\|msync(\|readv(\|writev(\|getsid(\|fdatasync(\|_sysctl(\|mlock(\|munlock(\|mlockall(\|munlockall(\|sched_setparam(\|sched_getparam(\|sched_setscheduler(\|sched_getscheduler(\|sched_yield(\|sched_get_priority_max(\|sched_get_priority_min(\|sched_rr_get_interval(\|nanosleep(\|mremap(\|setresuid(\|getresuid(\|vm86(\|query_module(\|poll(\|nfsservctl(\|setresgid(\|getresgid(\|prctl(\|rt_sigreturn(\|rt_sigaction(\|rt_sigprocmask(\|rt_sigpending(\|rt_sigtimedwait(\|rt_sigqueueinfo(\|rt_sigsuspend(\|pread(\|pwrite(\|chown(\|getcwd(\|capget(\|capset(\|sigaltstack(\|sendfile(\|getpmsg(\|putpmsg(\|vfork(" > /dev/null 2> /dev/null && ( printf "\e[1;95m   SYSTEM CALLS SYNTAX\e[0m (\e[91mA space before the bracket hurts my feelings !\e[0m)\n" && cat $1 | grep -n "setup (\|exit (\|fork (\|read (\|write (\|open (\|close (\|waitpid (\|creat (\|link (\|unlink (\|execve (\|chdir (\|time (\|mknod (\|chmod (\|lchown (\|break (\|oldstat (\|lseek (\|getpid (\|mount (\|umount (\|setuid (\|getuid (\|stime (\|ptrace (\|alarm (\|oldfstat (\|pause (\|utime (\|stty (\|gtty (\|access (\|nice (\|ftime (\|sync (\|kill (\|rename (\|mkdir (\|rmdir (\|dup (\|pipe (\|times (\|prof (\|brk (\|setgid (\|getgid (\|signal (\|geteuid (\|getegid (\|acct (\|umount2 (\|lock (\|ioctl (\|fcntl (\|mpx (\|setpgid (\|ulimit (\|oldolduname (\|umask (\|chroot (\|ustat (\|dup2 (\|getppid (\|getpgrp (\|setsid (\|sigaction (\|sgetmask (\|ssetmask (\|setreuid (\|setregid (\|sigsuspend (\|sigpending (\|sethostname (\|setrlimit (\|getrlimit (\|getrusage (\|gettimeofday (\|settimeofday (\|getgroups (\|setgroups (\|select (\|symlink (\|oldlstat (\|readlink (\|uselib (\|swapon (\|reboot (\|readdir (\|mmap (\|munmap (\|truncate (\|ftruncate (\|fchmod (\|fchown (\|getpriority (\|setpriority (\|profil (\|statfs (\|fstatfs (\|ioperm (\|socketcall (\|syslog (\|setitimer (\|getitimer (\|stat (\|lstat (\|fstat (\|olduname (\|iopl (\|vhangup (\|idle (\|vm86old (\|wait4 (\|swapoff (\|sysinfo (\|ipc (\|fsync (\|sigreturn (\|clone (\|setdomainname (\|uname (\|modify_ldt (\|adjtimex (\|mprotect (\|sigprocmask (\|create_module (\|init_module (\|delete_module (\|get_kernel_syms (\|quotactl (\|getpgid (\|fchdir (\|bdflush (\|sysfs (\|personality (\|afs_syscall (\|setfsuid (\|setfsgid (\|_llseek (\|getdents (\|_newselect (\|flock (\|msync (\|readv (\|writev (\|getsid (\|fdatasync (\|_sysctl (\|mlock (\|munlock (\|mlockall (\|munlockall (\|sched_setparam (\|sched_getparam (\|sched_setscheduler (\|sched_getscheduler (\|sched_yield (\|sched_get_priority_max (\|sched_get_priority_min (\|sched_rr_get_interval (\|nanosleep (\|mremap (\|setresuid (\|getresuid (\|vm86 (\|query_module (\|poll (\|nfsservctl (\|setresgid (\|getresgid (\|prctl (\|rt_sigreturn (\|rt_sigaction (\|rt_sigprocmask (\|rt_sigpending (\|rt_sigtimedwait (\|rt_sigqueueinfo (\|rt_sigsuspend (\|pread (\|pwrite (\|chown (\|getcwd (\|capget (\|capset (\|sigaltstack (\|sendfile (\|getpmsg (\|putpmsg (\|vfork (" | grep -v "setup(\|exit(\|fork(\|read(\|write(\|open(\|close(\|waitpid(\|creat(\|link(\|unlink(\|execve(\|chdir(\|time(\|mknod(\|chmod(\|lchown(\|break(\|oldstat(\|lseek(\|getpid(\|mount(\|umount(\|setuid(\|getuid(\|stime(\|ptrace(\|alarm(\|oldfstat(\|pause(\|utime(\|stty(\|gtty(\|access(\|nice(\|ftime(\|sync(\|kill(\|rename(\|mkdir(\|rmdir(\|dup(\|pipe(\|times(\|prof(\|brk(\|setgid(\|getgid(\|signal(\|geteuid(\|getegid(\|acct(\|umount2(\|lock(\|ioctl(\|fcntl(\|mpx(\|setpgid(\|ulimit(\|oldolduname(\|umask(\|chroot(\|ustat(\|dup2(\|getppid(\|getpgrp(\|setsid(\|sigaction(\|sgetmask(\|ssetmask(\|setreuid(\|setregid(\|sigsuspend(\|sigpending(\|sethostname(\|setrlimit(\|getrlimit(\|getrusage(\|gettimeofday(\|settimeofday(\|getgroups(\|setgroups(\|select(\|symlink(\|oldlstat(\|readlink(\|uselib(\|swapon(\|reboot(\|readdir(\|mmap(\|munmap(\|truncate(\|ftruncate(\|fchmod(\|fchown(\|getpriority(\|setpriority(\|profil(\|statfs(\|fstatfs(\|ioperm(\|socketcall(\|syslog(\|setitimer(\|getitimer(\|stat(\|lstat(\|fstat(\|olduname(\|iopl(\|vhangup(\|idle(\|vm86old(\|wait4(\|swapoff(\|sysinfo(\|ipc(\|fsync(\|sigreturn(\|clone(\|setdomainname(\|uname(\|modify_ldt(\|adjtimex(\|mprotect(\|sigprocmask(\|create_module(\|init_module(\|delete_module(\|get_kernel_syms(\|quotactl(\|getpgid(\|fchdir(\|bdflush(\|sysfs(\|personality(\|afs_syscall(\|setfsuid(\|setfsgid(\|_llseek(\|getdents(\|_newselect(\|flock(\|msync(\|readv(\|writev(\|getsid(\|fdatasync(\|_sysctl(\|mlock(\|munlock(\|mlockall(\|munlockall(\|sched_setparam(\|sched_getparam(\|sched_setscheduler(\|sched_getscheduler(\|sched_yield(\|sched_get_priority_max(\|sched_get_priority_min(\|sched_rr_get_interval(\|nanosleep(\|mremap(\|setresuid(\|getresuid(\|vm86(\|query_module(\|poll(\|nfsservctl(\|setresgid(\|getresgid(\|prctl(\|rt_sigreturn(\|rt_sigaction(\|rt_sigprocmask(\|rt_sigpending(\|rt_sigtimedwait(\|rt_sigqueueinfo(\|rt_sigsuspend(\|pread(\|pwrite(\|chown(\|getcwd(\|capget(\|capset(\|sigaltstack(\|sendfile(\|getpmsg(\|putpmsg(\|vfork(" | awk '{printf "    line ", gsub(/[ |	]+/," ")}1' );
-
-	#malloc cast
-#	cat $1 | grep "= malloc" > /dev/null 2> /dev/null && ( printf "\e[1;95m   MALLOC NOT CAST\e[0m\e[91m you fool !\e[0m\n" && cat $1 | grep -n "= malloc" | awk '{printf "    line ", gsub(/[ |	]+/," ")}1' );
-
-	#illegal comments
-	cat $1 | grep "//" > /dev/null 2> /dev/null && ( printf "\e[1;95m   C++ COMMENTS\e[0m\n" && cat $1 | grep -n "//" | awk '{printf "    line ", gsub(/[ |	]+/," ")}1' );
-
-	#variable decalration
-	cat $1 | grep -w "int\|char\|void\|size_t\|t_size\|t_data\|t_set\|short\|long\|double\|float\|extern\|const" | grep "=" | grep -v "static" | grep -v "malloc" | grep -v "\[" | grep -v "{" | grep -v "(\|)" > /dev/null 2> /dev/null && ( printf "\e[1m" && printf "\e[1;95m   ONE LINE DECLARATION\e[0m\n" && cat $1 | grep -wn "int\|char\|void\|size_t\|t_size\|t_data\|t_set\|short\|long\|double\|float\|extern\|const" | grep "=" | grep -v "static" | grep -v "malloc" | grep -v "\[" | grep -v "{\|}" | grep -v "(\|)" | awk '{printf "    line ", gsub(/[ |	]+/," ")}1' );
-
-	#space @ NewLine
-	cat $1 | grep -v '[a-z{}]' | grep -w " $" > /dev/null 2> /dev/null && ( printf "\e[1;95m   SPACE ON AN EMPTY LINE\e[0m\n" && cat $1 | grep -nv '[a-z{}]' | grep -w " $" | awk '{printf "    line ", gsub(" ", "\033[32m~\033[0m"), gsub("$", "\033[91m$\033[0m")}1' );
-
-	#space @ EOL
-	cat $1 | grep '[a-z{}]' | grep -w " $" > /dev/null 2> /dev/null && ( printf "\e[1;95m   SPACE AT END OF LINE\e[0m\n" && cat $1 | grep -n '[a-z{}]' | grep -w " $" | awk '{printf "    line ", gsub(/[ ]+/, " "), gsub("$", "\033[91m$\033[0m")}1' );
-
-	#tab @ NewLine
-	cat $1 | grep -v '[a-z{}]' | grep -w "	$" > /dev/null 2> /dev/null && ( printf "\e[1;95m   TAB ON AN EMPTY LINE\e[0m\n" && cat $1 | grep -nv '[a-z{}]' | grep -w "	$" | awk '{printf "    line ", gsub("	", "\033[32m>--\033[0m"), gsub("$", "\033[91m$\033[0m")}1' );
-
-	#tab @ EOL
-	cat $1 | grep '[a-z{}]' | grep -w "	$" > /dev/null 2> /dev/null && ( printf "\e[1;95m   TAB AT END OF LINE\e[0m\n" && cat $1 | grep -n '[a-z{}]' | grep -w "	$" | awk '{printf "    line ", gsub(/[	]+/, "	"), gsub("$", "\033[91m$\033[0m")}1' );
-	#functions indent
-
-}
-
 function bocal_norm_check
 {
 	printf "\r\e[94m*\e[0m\e[96mNORM BOCAL\e[0m               ( \033[94mBOCAL MADE IT SLOW...\033[0m )\n";
 	printf "#!/bin/zsh \n" > ~/.bocal.zsh && printf "/usr/bin/norminette \`find $dir -name \'*.[c|h]\' | grep -xv \'.\'\` | grep -v \'.git\' | grep -v \'~/.bocal.zsh\' | awk \'{gsub (\"Error\", \"\\033[91m         Error\\033[0m\")}1\' | awk '{gsub (\"Warning\", \"\\033[93mWarning\\033[0m\")}1\' | awk \'{gsub (\"Norme\", \"\\033[95mNorme\\033[0m\")}1\'" >> ~/.bocal.zsh && chmod +x ~/.bocal.zsh && ~/.bocal.zsh && rm ~/.bocal.zsh
 }
 
-function global_C_check
-{
-	if [ "$1" = "check" ]
-	then
-		if [[ `find $dir -name '*.c' | grep -xv '.' | grep -v ".git" | sed "s/\.\///g" 2> /dev/null` = "" ]]
-		then
-			return;
-		else
-			for f in `find $dir -name '*.c' | grep -xv '.' | grep -v ".git" | sed "s/\.\///g"`
-			do
-				cif_norm $f;
-			done
-		fi
-	else
-		for f in `find $dir -name '*.c' | grep -xv '.' | grep -v ".git" | sed "s/\.\///g"`
-		do
-			if [[ $(cif_norm $f) = "" ]]
-			then
-				printf "\r";
-			else
-				printf "  \033[1;91;4m"
-				printf "$f" | awk '{printf toupper($0)}';
-				printf "\033[0m:\n"
-				cif_norm $f;
-			fi
-		done
-	fi
-}
-
 function norm_check
 {
-	file_path=$(pwd | sed "s|$HOME|~|g")
-	printf "*\e[96mNORM HB\e[0m                  [  ..  ]  (\033[96m`printf "$file_path"`\033[0m)";
-	if [[ $(global_C_check "check") = "" ]]
-	then
-		printf "\r\e[92m*\e[0m\e[96mNORM HB\e[0m                  [  \e[92mOK\e[0m  ]  (\033[96m`printf "$file_path"`\033[0m)\n";
-	else
-		printf "\r\e[91m*\e[0m\e[96mNORM HB\e[0m                  [  \e[91mKO\e[0m  ]  (\033[96m`printf "$file_path"`\033[0m)\n";
-		global_C_check "display";
-	fi
-	printf "\n";
 	if [[ -f /usr/bin/norminette && -f /bin/zsh ]]
 	then
 		bocal_norm_check ;
