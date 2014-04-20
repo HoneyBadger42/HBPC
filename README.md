@@ -1,4 +1,4 @@
-HBPC v.1.1
+HBPC v.1.2
 ====
 
 Premier balbutiement d'un checker de programme EN BASH, offert par la team Honey_Badger !
