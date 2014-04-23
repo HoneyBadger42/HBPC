@@ -14,11 +14,13 @@ then
 	if [[ `cat ~/.zshrc | grep "alias hnorm='~/bin/norme/hnorm'"` == "" ]]
 	then
 		printf "\nalias hnorm='~/bin/norme/hnorm'\n" >> ~/.zshrc
+		source ~/.zshrc
 	fi
 elif [ -f ~/.bashrc ]
 then
 	if [[ `cat ~/.bashrc | grep "alias hnorm='~/bin/norme/hnorm'"` == "" ]]
 	then
 		printf "\nalias hnorm='~/bin/norme/hnorm'\n" >> ~/.bashrc
+		source ~/.bashrc
 	fi
 fi
