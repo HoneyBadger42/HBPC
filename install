@@ -1,7 +1,7 @@
 #!/bin/bash
 if [ ! -d ~/bin ]
 then
-	mdkir ~/bin && mkdir ~/bin/norme
+	mkdir ~/bin && mkdir ~/bin/norme
 else
 	if [ ! -d ~/bin/norme ]
 	then
