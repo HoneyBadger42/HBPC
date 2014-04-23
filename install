@@ -1,0 +1,10 @@
+#!/bin/bash
+if [ ! -d ~/bin ]
+then
+	mdkir ~/bin && mkdir ~/bin/norme
+else
+	if [ ! -d ~/bin/norme ]
+	then
+		mkdir ~/bin/norme
+	fi
+fi && cp hnorm ~/bin/norme && cd .. && rm -rf HBPC && cd ~/bin/norme
