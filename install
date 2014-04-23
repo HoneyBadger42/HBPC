@@ -8,3 +8,17 @@ else
 		mkdir ~/bin/norme
 	fi
 fi && cp hnorm ~/bin/norme && cd .. && rm -rf HBPC && cd ~/bin/norme
+
+if [ -f ~/.zshrc ]
+then
+	if [[ `cat ~/.zshrc | grep "alias hnorm='~/bin/norme/hnorm'"` == "" ]]
+	then
+		printf "\nalias hnorm='~/bin/norme/hnorm'\n" >> ~/.zshrc
+	fi
+elif [ -f ~/.bashrc ]
+then
+	if [[ `cat ~/.bashrc | grep "alias hnorm='~/bin/norme/hnorm'"` == "" ]]
+	then
+		printf "\nalias hnorm='~/bin/norme/hnorm'\n" >> ~/.bashrc
+	fi
+fi
