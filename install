@@ -16,6 +16,7 @@ then
 		printf "\nalias hnorm='~/bin/norme/hnorm'\n" >> ~/.zshrc
 		source ~/.zshrc
 	fi
+	source ~/.zshrc
 elif [ -f ~/.bashrc ]
 then
 	if [[ `cat ~/.bashrc | grep "alias hnorm='~/bin/norme/hnorm'"` == "" ]]
@@ -23,4 +24,8 @@ then
 		printf "\nalias hnorm='~/bin/norme/hnorm'\n" >> ~/.bashrc
 		source ~/.bashrc
 	fi
-fi
+	source ~/.bashrc
+fi 2> /dev/null
+
+cd ..
+printf "\03392mInstallation Successful !\n\033[0m"
