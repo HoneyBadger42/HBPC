@@ -28,4 +28,4 @@ then
 fi 2> /dev/null
 
 cd ..
-printf "\033[92mInstallation Successful !\n\033[0m"
+printf "\033[92mInstallation Successful !\n\033[93mPlease enter\033[0m cd ..\n"
