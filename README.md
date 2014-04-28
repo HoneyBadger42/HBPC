@@ -3,7 +3,7 @@ HBPC v.1.2
 
 INSTALLATION: 
 
-    git clone https://github.com/HoneyBadger42/HBPC.git && cd HBPC && bash install
+    git clone --quiet https://github.com/HoneyBadger42/HBPC.git && cd HBPC && bash install
 
 Premier balbutiement d'un checker de programme EN BASH, offert par la team Honey_Badger !
 Il fera tout plein de trucs quand il sera fini.
