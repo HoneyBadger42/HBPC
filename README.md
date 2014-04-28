@@ -1,6 +1,10 @@
 HBPC v.1.2
 ====
 
+INSTALLATION: 
+
+curl -s https://raw.githubusercontent.com/HoneyBadger42/HBPC/master/install | bash
+
 Premier balbutiement d'un checker de programme EN BASH, offert par la team Honey_Badger !
 Il fera tout plein de trucs quand il sera fini.
 
