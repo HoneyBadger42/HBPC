@@ -164,6 +164,7 @@ function help_menu
 			printf "\n";
 		else
 			printf "\e[92mUpdate available\e[0m (\e[96mhnorm -D\e[0m to install it)\n\n";
+			download_update ; exit 0;
 		fi
 	fi
 	printf "Usage: \e[91mhnorm\e[0m \e[1;95m[ \e[96m-h\e[0m | \e[96m-v\e[0m | \e[92m-D\e[0m | \e[93m-u\e[0m <user> \e[35m[\e[0m<dir>\e[35m]\e[0m \e[1;95m]\e[0m\n\n";
@@ -199,6 +200,7 @@ function main
 			printf "\n";
 		else
 			printf "\e[92mUpdate available\e[0m (\e[96mhnorm -D\e[0m to install it)\n\n";
+			download_update ; exit 0;
 		fi
 	fi
 	if [[ "$1" == "-h" || "$1" == "-v" || "$1" == "-D" || "$1" == "-u" ]]
