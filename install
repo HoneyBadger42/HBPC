@@ -20,5 +20,7 @@ then
 	source ~/$SREF
 fi 2> /dev/null
 
-cd ..
+cd
+~/bin/norme/hnorm -h
+
 printf "\033[92mInstallation Successful !\n\033[93mPlease enter:\033[0m cd .. ; source $SREF \n"
