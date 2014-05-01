@@ -43,6 +43,10 @@ function cif_header
 function bocal_norm_check
 {
 	printf "\r\e[94m*\e[0m\e[96mNORM BOCAL\e[0m               ( \033[94mBOCAL MADE IT SLOW...\033[0m )\n";
+	qty=$(find $dir -type f \( -iname '*.h' -o -iname '*.c' \) | grep -xv '.' | sed "s/\.\///g" | wc -l | awk '{print $1}')
+	qtime=$(printf '%.0f' `echo "$qty * 2.5" | bc`)
+	qtytime=$(date -u -r $qtime +%T)
+	printf "\n\033[93m$qty\033[0m files to check\n(it might take around \033[93m$qtytime\033[0m)\n\n"
 	for file in `find $dir -type f \( -iname '*.h' -o -iname '*.c' \) | grep -xv '.' | sed "s/\.\///g"`
 	do
 		printf "\033[95m$(printf "$file" | awk '{print toupper ($1)}')\033[0m: .."
@@ -192,7 +196,7 @@ function help_menu
 function main
 {
 	is_connected=$(ifconfig | grep -w "inet" | grep -v "127.0.0.1")
-	cur_ver="v.1.6"
+	cur_ver="v.1.7"
 	no_check=0
 	off_ver=$(curl -s https://github.com/HoneyBadger42/HBPC | grep "HBPC v" | grep -v "$cur_ver")
 	clear
