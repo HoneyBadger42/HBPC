@@ -51,12 +51,12 @@ function bocal_norm_check
 	for file in `find $dir -type f \( -iname '*.h' -o -iname '*.c' \) | grep -xv '.' | sed "s/\.\///g"`
 	do
 		$(( fileref++ )) 2> /dev/null
-		printf "[%02d]\033[95m$(printf "$file" | awk '{print toupper ($1)}')\033[0m: .." $fileref
+		printf "[\033[33m%02d\033[0m]\033[95m$(printf "$file" | awk '{print toupper ($1)}')\033[0m: .." $fileref
 		if [[ `/usr/bin/norminette $file 2> /dev/null | grep "Error\|Warining" | awk '{gsub ("Error", "\033[31m	Error\033[0m")}1'` == "" ]]
 		then
-			printf "\r[%02d]\033[95m$(printf "$file" | awk '{print toupper ($1)}')\033[0m: \033[92mOK\033[0m\n" $fileref
+			printf "\r[\033[33m%02d\033[0m]\033[95m$(printf "$file" | awk '{print toupper ($1)}')\033[0m: \033[92mOK\033[0m\n" $fileref
 		else
-			printf "\r[%02d]\033[95m$(printf "$file" | awk '{print toupper ($1)}')\033[0m: \033[91mKO\033[0m\n" $fileref
+			printf "\r[\033[33m%02d\033[0m]\033[95m$(printf "$file" | awk '{print toupper ($1)}')\033[0m: \033[91mKO\033[0m\n" $fileref
 			/usr/bin/norminette $file 2> /dev/null | grep "Error\|Warining" | awk '{gsub ("Error", "\033[31m	Error\033[0m")}1'
 		fi
 	done
