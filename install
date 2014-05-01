@@ -1,4 +1,5 @@
 #!/bin/bash
+SREF=".$(basename $SHELL)rc"
 if [ ! -d ~/bin ]
 then
 	mkdir ~/bin && mkdir ~/bin/norme
@@ -9,23 +10,15 @@ else
 	fi
 fi && cp hnorm ~/bin/norme && cd .. && rm -rf HBPC && cd ~/bin/norme
 
-if [ -f ~/.zshrc ]
+if [ -f ~/$SREF ]
 then
-	if [[ `cat ~/.zshrc | grep "alias hnorm='~/bin/norme/hnorm'"` == "" ]]
+	if [[ `cat ~/$SREF | grep "alias hnorm='~/bin/norme/hnorm'"` == "" ]]
 	then
-		printf "\nalias hnorm='~/bin/norme/hnorm'\n" >> ~/.zshrc
-		source ~/.zshrc
+		printf "\nalias hnorm='~/bin/norme/hnorm'\n" >> ~/$SREF
+		source ~/$SREF
 	fi
-	source ~/.zshrc
-elif [ -f ~/.bashrc ]
-then
-	if [[ `cat ~/.bashrc | grep "alias hnorm='~/bin/norme/hnorm'"` == "" ]]
-	then
-		printf "\nalias hnorm='~/bin/norme/hnorm'\n" >> ~/.bashrc
-		source ~/.bashrc
-	fi
-	source ~/.bashrc
+	source ~/$SREF
 fi 2> /dev/null
 
 cd ..
-printf "\033[92mInstallation Successful !\n\033[93mPlease enter\033[0m cd ..\n"
+printf "\033[92mInstallation Successful !\n\033[93mPlease enter:\033[0m cd .. ; source $SREF \n"
