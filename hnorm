@@ -43,7 +43,17 @@ function cif_header
 function bocal_norm_check
 {
 	printf "\r\e[94m*\e[0m\e[96mNORM BOCAL\e[0m               ( \033[94mBOCAL MADE IT SLOW...\033[0m )\n";
-	printf "#!/bin/zsh \n" > ~/.bocal.zsh && printf "/usr/bin/norminette \`find $dir -name \'*.[c|h]\' | grep -xv \'.\'\` | grep -v \'.git\' | grep -v \'~/.bocal.zsh\' | awk \'{gsub (\"Error\", \"\\033[91m         Error\\033[0m\")}1\' | awk '{gsub (\"Warning\", \"\\033[93mWarning\\033[0m\")}1\' | awk \'{gsub (\"Norme\", \"\\033[95mNorme\\033[0m\")}1\'" >> ~/.bocal.zsh && chmod +x ~/.bocal.zsh && ~/.bocal.zsh && rm ~/.bocal.zsh
+	for file in `find $dir -type f \( -iname '*.h' -o -iname '*.c' \) | grep -xv '.' | sed "s/\.\///g"`
+	do
+		printf "\033[95m$(printf "$file" | awk '{print toupper ($1)}')\033[0m: .."
+		if [[ `/usr/bin/norminette $file 2> /dev/null | grep "Error\|Warining" | awk '{gsub ("Error", "\033[31m	Error\033[0m")}1'` == "" ]]
+		then
+			printf "\r\033[95m$(printf "$file" | awk '{print toupper ($1)}')\033[0m: \033[92mOK\033[0m\n"
+		else
+			printf "\r\033[95m$(printf "$file" | awk '{print toupper ($1)}')\033[0m: \033[91mKO\033[0m\n"
+			/usr/bin/norminette $file 2> /dev/null | grep "Error\|Warining" | awk '{gsub ("Error", "\033[31m	Error\033[0m")}1'
+		fi
+	done
 }
 
 function norm_check
@@ -58,7 +68,7 @@ function norm_check
 
 function cif_cheat
 {
-	for file in `find . -name '*.[c|h]' | grep -xv '.' | sed "s/\.\///g"` ;
+	for file in `find $dir -type f \( -iname '*.h' -o -iname '*.c' \) | grep -xv '.' | sed "s/\.\///g"` ;
 	do
 		cat $file | grep -w "<stdio.h>\|printf(\|scanf(\|puts(\|putc(\|gets(\|getc(\|system(" | grep -v "tputs(" > /dev/null 2> /dev/null && ( printf "\e[33m  $file\e[0m:\n\e[0m" && cat $file | grep -n "<stdio.h>\|printf(\|scanf(\|puts(\|putc(\|gets(\|getc(\|system(" | grep -v "tputs(" | awk '{printf "   line ", gsub(/[ |	]+/," ")}1' );
 		if [[ `cif_header $file 2> /dev/null` = "" ]]
@@ -182,7 +192,7 @@ function help_menu
 function main
 {
 	is_connected=$(ifconfig | grep -w "inet" | grep -v "127.0.0.1")
-	cur_ver="v.1.5"
+	cur_ver="v.1.6"
 	no_check=0
 	off_ver=$(curl -s https://github.com/HoneyBadger42/HBPC | grep "HBPC v" | grep -v "$cur_ver")
 	clear
