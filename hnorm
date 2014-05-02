@@ -48,7 +48,7 @@ function bocal_norm_check
 	qtytime=$(date -u -r $qtime +%T)
 	printf "\n\033[93m$qty\033[0m files to check\n(it might take around \033[93m$qtytime\033[0m)\n\n"
 	fileref=0;
-	for file in `find $dir -type f \( -iname '*.h' -o -iname '*.c' \) | grep -xv '.' | sed "s/\.\///g"`
+	for file in `find $dir -iname '*.h' -o -iname '*.c' \) | grep -xv '.' | sed "s/\.\///g"`
 	do
 		$(( fileref++ )) 2> /dev/null
 		printf "[\033[33m%02d\033[0m]\033[95m$(printf "$file" | awk '{print toupper ($1)}')\033[0m: .." $fileref
@@ -198,7 +198,7 @@ function help_menu
 function main
 {
 	is_connected=$(ifconfig | grep -w "inet" | grep -v "127.0.0.1")
-	cur_ver="v.2.0"
+	cur_ver="v.2.1"
 	no_check=0
 	off_ver=$(curl -s https://github.com/HoneyBadger42/HBPC | grep "HBPC v" | grep -v "$cur_ver")
 	clear
