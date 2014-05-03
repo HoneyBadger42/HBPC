@@ -151,7 +151,7 @@ function dir_check
 function download_update
 {
 	cd $(dirname $0) ;
-	printf "\e[93m      Downloading update...\e[0m\n" ;
+	printf "\n\e[93m      Downloading update...\e[0m\n" ;
 	git clone https://github.com/HoneyBadger42/HBPC.git > /dev/null 2>&1 && printf "\e[96m      Installing update...\e[0m\n" &&
 		cp HBPC/hnorm . && rm -rf HBPC && printf "\e[92m      Done !\n\nYou can now use hnorm's last version !\e[0m\n\n";
 	cd - > /dev/null
@@ -173,7 +173,6 @@ function help_menu
 		then
 			printf "\n";
 		else
-			printf "\e[92mUpdate available\e[0m (\e[96mhnorm -D\e[0m to install it)\n\n";
 			download_update ; exit 0;
 		fi
 	fi
@@ -209,7 +208,6 @@ function main
 		then
 			printf "\n";
 		else
-			printf "\e[92mUpdate available\e[0m (\e[96mhnorm -D\e[0m to install it)\n\n";
 			download_update ; exit 0;
 		fi
 	fi
