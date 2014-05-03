@@ -44,22 +44,12 @@ function bocal_norm_check
 {
 	printf "\r\e[94m*\e[0m\e[96mNORM BOCAL\e[0m               ( \033[94mBOCAL MADE IT SLOW...\033[0m )\n";
 	qty=$(find . -type f \( -iname '*.h' -o -iname '*.c' \) | grep -xv '.' | sed "s/\.\///g" | wc -l | awk '{print $1}')
-	qtime=$(printf '%.0f' `echo "$qty * 2.5" | bc`)
+	lqty=$(cat `find . -type f \( -iname '*.h' -o -iname '*.c' \) | grep -xv '.' | sed "s/\.\///g"` | wc -l | awk '{print $1}')
+	qtime=$(printf '%.0f' `echo "$lqty * 0.01" | bc`)
 	qtytime=$(date -u -r $qtime +%T)
-	printf "\n\033[93m$qty\033[0m files to check\n(it might take around \033[93m$qtytime\033[0m)\n\n"
-	fileref=0;
-	for file in `find . -iname '*.h' -o -iname '*.c' | grep -xv '.' | sed "s/\.\///g"`
-	do
-		$(( fileref++ )) 2> /dev/null
-		printf "[\033[33m%02d\033[0m]\033[95m$(printf "$file" | awk '{print toupper ($1)}')\033[0m: .." $fileref
-		if [[ `/usr/bin/norminette $file 2> /dev/null | grep "Error\|Warining" | awk '{gsub ("Error", "\033[31m	Error\033[0m")}1'` == "" ]]
-		then
-			printf "\r[\033[33m%02d\033[0m]\033[95m$(printf "$file" | awk '{print toupper ($1)}')\033[0m: \033[92mOK\033[0m\n" $fileref
-		else
-			printf "\r[\033[33m%02d\033[0m]\033[95m$(printf "$file" | awk '{print toupper ($1)}')\033[0m: \033[91mKO\033[0m\n" $fileref
-			/usr/bin/norminette $file 2> /dev/null | grep "Error\|Warining" | awk '{gsub ("Error", "\033[31m	Error\033[0m")}1'
-		fi
-	done
+	printf "\n\033[93m$qty\033[0m files to check\n(it should take around \033[93m$qtytime\033[0m)\n\n"
+	file=`find . -iname '*.h' -o -iname '*.c' | grep -xv '.' | sed "s/\.\///g"`
+	/usr/bin/norminette `find . -iname '*.h' -o -iname '*.c' | grep -xv '.' | sed "s/\.\///g"` 2> /dev/null | awk 'fileref == 0 {fileref++} $0 !~ /Error/ {printf ("\033[0m[\033[33m%d\033[0m]", fileref++)} {gsub ("Norme: ", "\033[0m\033[1;94;4m"); gsub ("Error", "\033[0;91m	Error\033[0m"); gsub ("Warning", "\033[0;93mWarning\033[0m")}1'
 }
 
 function norm_check
@@ -202,7 +192,7 @@ function help_menu
 function main
 {
 	is_connected=$(ifconfig | grep -w "inet" | grep -v "127.0.0.1")
-	cur_ver="v.2.3"
+	cur_ver="v.2.4"
 	no_check=0
 	off_ver=$(curl -s https://github.com/HoneyBadger42/HBPC | grep "HBPC v" | grep -v "$cur_ver")
 	clear
