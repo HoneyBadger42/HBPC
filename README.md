@@ -1,4 +1,4 @@
-HBPC v.2.5
+HBPC v.2.6
 ====
 
 INSTALLATION: 
