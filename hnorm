@@ -44,7 +44,7 @@ function bocal_norm_check
 {
 	printf "\r\e[94m*\e[0m\e[96mNORM BOCAL\e[0m               ( \033[94mBOCAL MADE IT SLOW...\033[0m )\n";
 	qty=$(find . -type f \( -iname '*.h' -o -iname '*.c' \) | grep -xv '.' | sed "s/\.\///g" | wc -l | awk '{print $1}')
-	lqty=$(res=0 ; for i in $(ls -l `find . -iname '*.c' -o -iname '*.h'` | awk '{print $5}') ; do res=$(( res += $i )) ; done ; echo $res)
+	lqty=`cat $(find . -iname '*.c' -o -iname '*.h') | wc -l | awk '{print $1}'`
 	qtime=$(printf '%.0f' `echo "$lqty * 0.00008" | bc`)
 	qtytime=$(date -u -r $qtime +%T)
 	printf "\n\033[93m$qty\033[0m files to check\n(it should take around \033[93m$qtytime\033[0m)\n\n"
