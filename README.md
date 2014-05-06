@@ -1,7 +1,7 @@
-HBPC v.2.6
+HBPC v.2.6.1
 ====
 
-INSTALLATION: 
+INSTALLATION:
 
     git clone --quiet https://github.com/HoneyBadger42/HBPC.git && cd HBPC && bash install
 

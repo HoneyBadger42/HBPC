@@ -70,7 +70,7 @@ function cif_cheat
 	fi
 	for file in `find . -type f \( -iname '*.h' -o -iname '*.c' \) | grep -xv '.' | sed "s/\.\///g"` ;
 	do
-		cat $file | grep -w "<stdio.h>\|printf(\|scanf(\|puts(\|putc(\|gets(\|getc(\|system(" | grep -v "tputs(" > /dev/null 2> /dev/null && ( printf "\e[33m  $file\e[0m:\n\e[0m" && cat $file | grep -n "<stdio.h>\|printf(\|scanf(\|puts(\|putc(\|gets(\|getc(\|system(" | grep -v "tputs(" | awk '{printf "   line ", gsub(/[ |	]+/," ")}1' );
+		cat $file | grep -w "<stdio.h>\|printf(\|scanf(\|puts(\|putc(\|gets(\|getc(\|system(" | grep -v "tputs(\|ft_printf" > /dev/null 2> /dev/null && ( printf "\e[33m  $file\e[0m:\n\e[0m" && cat $file | grep -n "<stdio.h>\|printf(\|scanf(\|puts(\|putc(\|gets(\|getc(\|system(" | grep -v "tputs(\|ft_printf" | awk '{printf "   line ", gsub(/[ |	]+/," ")}1' );
 		if [[ `cif_header $file 2> /dev/null` = "" ]]
 		then
 			printf "\0";
@@ -83,10 +83,6 @@ function cif_cheat
 
 function cheat_check
 {
-	if [ -d src* ]
-	then
-		cd src*;
-	fi
 	printf "*\e[96mDANGER\e[0m                   [  ..  ]";
 	if [[ $(cif_cheat) = "" ]]
 	then
@@ -106,7 +102,7 @@ function make_check
 		( ((make re; make) | grep -w "make: Nothing to be done for" > /dev/null) &&
 		(printf "\r\e[92m*\e[0m\e[96mCOMPILE\e[0m                  [\e[92m  OK  \e[0m]\n" && make fclean > /dev/null 2> /dev/null) ||
 		(printf "\r\e[91m*\e[0m\e[96mCOMPILE\e[0m                  [\e[91m  KO  \e[0m]  (\e[91mThe Makefile relinks... Bloubloublou\e[0m)\n" && make fclean > /dev/null 2> /dev/null)
-		) ||
+	) ||
 		(printf "\r\e[91m*\e[0m\e[96mCOMPILE\e[0m                  [\e[91m  KO  \e[0m]\n" && make fclean > /dev/null 2> /dev/null);
 	printf "\n";
 	cheat_check;
@@ -191,7 +187,7 @@ function help_menu
 function main
 {
 	is_connected=$(ifconfig | grep -w "inet" | grep -v "127.0.0.1")
-	cur_ver="v.2.6"
+	cur_ver="v.2.6.1"
 	no_check=0
 	off_ver=$(curl -s https://github.com/HoneyBadger42/HBPC | grep "HBPC v" | grep -v "$cur_ver")
 	clear
@@ -217,21 +213,21 @@ function main
 		do
 			case $OPTION in
 				h) help_menu ; exit 0;;
-				v) echo "Current version: $cur_ver" ; exit 0;;
-				D) download_update ; exit 0;;
-				u) if [[ "$OPTARG" != "-h" && "$OPTARG" != "-D" && "$OPTARG" != "-u" && "$OPTARG" == ${@: -1} ]]
-				then
-					user=$OPTARG;
-					dir_check .;
-				elif [[ "$OPTARG" != "-h" && "$OPTARG" != "-D" && "$OPTARG" != "-u"  && "$OPTARG" != "${@: -1}" ]]
-				then
-					user=$OPTARG;
-					dir_check ${@: -1};
-				else
-					printf " Please enter a correct user name\n\n";
-					exit 1;
-				fi ;;
-				\?) help_menu ; exit 1;;
+			v) echo "Current version: $cur_ver" ; exit 0;;
+		D) download_update ; exit 0;;
+	u) if [[ "$OPTARG" != "-h" && "$OPTARG" != "-D" && "$OPTARG" != "-u" && "$OPTARG" == ${@: -1} ]]
+	then
+		user=$OPTARG;
+		dir_check .;
+	elif [[ "$OPTARG" != "-h" && "$OPTARG" != "-D" && "$OPTARG" != "-u"  && "$OPTARG" != "${@: -1}" ]]
+	then
+		user=$OPTARG;
+		dir_check ${@: -1};
+	else
+		printf " Please enter a correct user name\n\n";
+		exit 1;
+	fi ;;
+\?) help_menu ; exit 1;;
 			esac
 		done
 	else
