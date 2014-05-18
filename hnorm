@@ -186,11 +186,6 @@ function help_menu
 
 function main
 {
-	if [[ `ls -lR | wc -l | awk '{print $1}'` -ge 1000 ]]
-	then
-		printf "\033[91mTOO MUCH FILES IN THIS FOLDER -> \033[93m`pwd`\033[0m\n"
-		exit
-	fi 2> /dev/null
 	is_connected=$(ifconfig | grep -w "inet" | grep -v "127.0.0.1")
 	cur_ver="v.2.1"
 	no_check=0
@@ -212,6 +207,11 @@ function main
 			download_update ; exit 0;
 		fi
 	fi
+	if [[ `ls -lR | wc -l | awk '{print $1}'` -ge 1000 ]]
+	then
+		printf "\033[91mTOO MUCH FILES IN THIS FOLDER -> \033[93m`pwd`\033[0m\n"
+		exit
+	fi 2> /dev/null
 	if [[ "$1" == "-h" || "$1" == "-v" || "$1" == "-D" || "$1" == "-u" ]]
 	then
 		while getopts "hvDu:" OPTION
