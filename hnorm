@@ -186,13 +186,13 @@ function help_menu
 
 function main
 {
-	if [[ `ls -lR | wc -l | awk '{print $1}'` > 1000 ]]
+	if [[ `ls -lR | wc -l | awk '{print $1}'` -ge 1000 ]]
 	then
 		printf "\033[91mTOO MUCH FILES IN THIS FOLDER -> \033[93m`pwd`\033[0m\n"
 		exit
 	fi 2> /dev/null
 	is_connected=$(ifconfig | grep -w "inet" | grep -v "127.0.0.1")
-	cur_ver="v.2.8"
+	cur_ver="v.2.1"
 	no_check=0
 	off_ver=$(curl -s https://github.com/HoneyBadger42/HBPC | grep "HBPC v" | grep -v "$cur_ver")
 	clear
