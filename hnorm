@@ -209,7 +209,7 @@ function main
 	fi
 	if [[ `ls -lR | wc -l | awk '{print $1}'` -ge 1000 ]]
 	then
-		printf "\033[91mTOO MUCH FILES IN THIS FOLDER -> \033[93m`pwd`\033[0m\n"
+		printf "\033[91mTOO MUCH FILES IN THIS FOLDER -> \033[93m$PWD\033[0m\n"
 		exit
 	fi 2> /dev/null
 	if [[ "$1" == "-h" || "$1" == "-v" || "$1" == "-D" || "$1" == "-u" ]]
