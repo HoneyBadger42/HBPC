@@ -44,7 +44,6 @@ __changes__ = """\
 
 from sys import version_info
 from subprocess import call, Popen
-from os.path import exists, join
 
 if not version_info[:2] == (3, 4):
     print("Installing Py3 using brew.\n")
@@ -54,7 +53,9 @@ if not version_info[:2] == (3, 4):
     exit(0)
 
 try:
+    from colorama import init
     from docopt import docopt
+    from pathlib import Path
 except ImportError as e:
     module = str(e).split("'")[1]
     print("Module named %s missing: trying to install it." % module)
@@ -65,28 +66,26 @@ except ImportError as e:
 
 def auteur_users(folder):
     users = []
-    auteur_file = join(folder, "auteur")
-    if exists(auteur_file):
-        with open(auteur_file) as fd:
-            users.extend(fd.read().splitlines())
+    auteur = folder/"auteur"
+    if auteur.exists():
+        with auteur.open() as f:
+            users.extend(f.read().splitlines())
     return users
 
 
 def main(args):
     errors = []
-    folder = args['FOLDER'] or '.'
+    folder = Path(args['FOLDER'] or '.')
     users = auteur_users(folder)
     if not users:
         errors.append("`auteur` file is invalid.")
     users.extend(args["--user"])
     if not users:
         errors.append("No usernames availables, headers cannot be checked.")
-    print(errors)
 
 
 if __name__ == '__main__':
     arguments = docopt(__doc__, version=__version__)
-    print(arguments)
     if not arguments["--changelog"]:
         main(arguments)
     else:
