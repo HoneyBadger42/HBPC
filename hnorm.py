@@ -49,8 +49,13 @@ Options:
 
 """
 
-__version__ = "0.2"
+__version__ = "0.2a"
 __changes__ = """\
+0.2a:
+    - Removed useless header parsing
+    - Added calls to norminette
+    * TODO get_header
+
 0.2:
     - Source file iteration
     - Added check for headers
@@ -75,7 +80,7 @@ DISPLAY_MESSAGES = True
 # End of user config
 
 
-from subprocess import call, Popen
+from subprocess import call, Popen, PIPE
 from sys import version_info
 
 if not version_info[:2] == (3, 4):
@@ -87,11 +92,12 @@ if not version_info[:2] == (3, 4):
 
 
 from pathlib import Path
+from pprint import pprint
 import re
 from time import sleep
 
 try:
-    from colorama import init, Fore, Back
+    from colorama import Fore, Back, init as color_init
     from docopt import docopt
 except ImportError as e:
     module = str(e).split("'")[1]
@@ -102,18 +108,15 @@ except ImportError as e:
 
 
 def message(message):
-    sleep(0.3)
     if DISPLAY_MESSAGES:
         print(Fore.GREEN + "[!] " + Fore.RESET + message)
 
 
 def warning(message):
-    sleep(0.3)
     print(Fore.YELLOW + "[W] " + Fore.BLACK + Back.YELLOW + message)
 
 
 def error(message):
-    sleep(0.3)
     print(Fore.RED + "[E] " + Fore.RESET + Back.RED + message)
 
 
@@ -129,52 +132,37 @@ def auteur_users(folder):
         error("`auteur` file is missing.")
     return users
 
-
-header_regexp = [
-    "^/\* \*{74} \*/$",
-    "^/\* {76}\*/$",
-    "^/\* {56}:::      ::::::::   \*/$",
-    "^/\* {3}(.{50}) :\+: {6}:\+: {4}:\+: {3}\*/$",
-    "^/\* {52}\+:\+ \+:\+ {9}\+:\+     \*/$",
-    "\
-^/\* {3}By: ([a-z-]{3,8}) <((.+)@.+)> {1,30}\+#\+  \+:\+ {7}\+#\+ {8}\*/$",
-    "^/\* {48}\+#\+#\+#\+#\+#\+   \+#\+ {11}\*/$",
-    "^/\* {3}Created: (\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}) by ([a-z-]{3,8}) \
-{10,15}#\+# {4}#\+# {13}\*/$",
-    "^/\* {3}Updated: (\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}) by ([a-z-]{3,8}) \
-{9,14}###   ########\.fr {7}\*/$",
-    "^/\* {76}\*/$",
-    "^/\* \*{74} \*/",
-]
+header_regexp = {
+    4: "^/\* {3}(.{50}) :\+: {6}:\+: {4}:\+: {3}\*/\n$",
+    6: "^/\* {3}By: ([a-z-]{3,8}) <.+@.+> {1,30}\+#\+  \+:\+ {7}\+#\+ {8}\*/$",
+    8: "^/\* {3}Created: (\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}) by \
+([a-z-]{3,8}) {10,15}#\+# {4}#\+# {13}\*/$",
+    9: "^/\* {3}Updated: (\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}) by \
+([a-z-]{3,8}) {9,14}###   ########\.fr {7}\*/$",
+}
 
 
-def get_header(source):
-    text = source.read()
-    text_header = text.splitlines()[:11]
-    if len(text_header) != 11:
-        return None
+def get_header(path): # TODO
+    source = path.open()
+    text = source.read().splitlines()
     header = {}
-    for line, regexp in zip(text_header, header_regexp):
-        r = re.compile(regexp)
-        if not r.match(line):
-            return None
     header["created_by"] = "ldesgoui"
+    source.close()
     return header
 
 
 def check_source(path):
-    source = path.open()
-    header = get_header(source)
-    if header:
-        if users:
-            pass
-        elif 'created_by' in header:
-            warning("Assuming %s as author" % header['created_by'])
-            users.append(header['created_by'])
-        message("Header of file %s was valid." % path.relative_to(folder))
-    else:
-        error("No valid header was found in %s" % path.relative_to(folder))
-    source.close()
+    relative_path = path.relative_to(Path().resolve())
+    proc = Popen(["norminette", str(relative_path)], stdout=PIPE)
+    while proc.poll() is None:
+        sleep(0.3)
+    stdin, _ = proc.communicate()
+    errors = stdin.splitlines()
+    errors.remove(b"Norme: " + bytes(relative_path))
+    if 'Error: 42 header not at top of the file' not in errors:
+        header = get_header(path)
+    result = {"errors": errors, "path": path}
+    return result
 
 
 def main(args):
@@ -182,7 +170,7 @@ def main(args):
     global users
     global sources
 
-    init(autoreset=True)
+    color_init(autoreset=True)
     message("Welcome to the Honeybadger Program Checker")
 
     folder = Path(args['FOLDER'] or '.').resolve()
@@ -207,10 +195,11 @@ def main(args):
         message("Found %d source files." % amount_sources)
     else:
         error("No source files were found.")
-
-    for source in sources:
-        check_source(source)
-
+    results = map(check_source, sources)
+    for result in results:
+        message(str(result['path']))
+        for error_message in result['errors']:
+            error(str(error_message))
 
 if __name__ == '__main__':
     arguments = docopt(__doc__, version=__version__)
