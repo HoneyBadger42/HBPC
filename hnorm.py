@@ -67,15 +67,6 @@ __changes__ = """\
     - Auteur file check added
     - Cool Honeybadger header
 """
-__todo__ = """
-- Call norminette on source files
-- Check header from files
-- Check for common banned functions
-
-- Unit tests
-
-- Translations/Shorter messages? (?)
-"""
 
 # User config:
 
@@ -84,6 +75,7 @@ DISPLAY_MESSAGES = True
 # End of user config
 
 
+from subprocess import call, Popen
 from sys import version_info
 
 if not version_info[:2] == (3, 4):
