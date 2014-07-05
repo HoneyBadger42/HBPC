@@ -49,7 +49,7 @@ Options:
 
 """
 
-__version__ = "0.1b"
+__version__ = "0.2"
 __changes__ = """\
 0.2:
     - Source file iteration
