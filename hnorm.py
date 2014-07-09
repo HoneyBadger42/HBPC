@@ -91,6 +91,7 @@ if not version_info[:2] == (3, 4):
     exit(0)
 
 
+from multiprocessing.dummy import Pool
 from pathlib import Path
 from pprint import pprint
 import re
@@ -133,12 +134,12 @@ def auteur_users(folder):
     return users
 
 header_regexp = {
-    4: "^/\* {3}(.{50}) :\+: {6}:\+: {4}:\+: {3}\*/\n$",
-    6: "^/\* {3}By: ([a-z-]{3,8}) <.+@.+> {1,30}\+#\+  \+:\+ {7}\+#\+ {8}\*/$",
-    8: "^/\* {3}Created: (\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}) by \
-([a-z-]{3,8}) {10,15}#\+# {4}#\+# {13}\*/$",
-    9: "^/\* {3}Updated: (\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}) by \
-([a-z-]{3,8}) {9,14}###   ########\.fr {7}\*/$",
+    3: re.compile("^/\* {3}(.{50}) :\+: {6}:\+: {4}:\+: {3}\*/$"),
+    5: re.compile("^/\* {3}By: ([a-z-]{3,8}) <.+@.+> {1,30}\+#\+  \+:\+ {7}\+#\+ {8}\*/$"),
+    7: re.compile("^/\* {3}Created: \d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2} by \
+([a-z-]{3,8}) {10,15}#\+# {4}#\+# {13}\*/$"),
+    8: re.compile("^/\* {3}Updated: \d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2} by \
+([a-z-]{3,8}) {9,14}###   ########\.fr {7}\*/$"),
 }
 
 
@@ -146,7 +147,10 @@ def get_header(path): # TODO
     source = path.open()
     text = source.read().splitlines()
     header = {}
-    header["created_by"] = "ldesgoui"
+    header["filename"]   = header_regexp[3].findall(text[3])[0].strip()
+    header["author"]     = header_regexp[5].findall(text[5])[0].strip()
+    header["created_by"] = header_regexp[7].findall(text[7])[0].strip()
+    header["updated_by"] = header_regexp[8].findall(text[8])[0].strip()
     source.close()
     return header
 
@@ -157,23 +161,26 @@ def check_source(path):
     while proc.poll() is None:
         sleep(0.3)
     stdin, _ = proc.communicate()
-    errors = stdin.splitlines()
-    errors.remove(b"Norme: " + bytes(relative_path))
-    if 'Error: 42 header not at top of the file' not in errors:
+    errors = list(map(lambda x: x.decode("utf-8"), stdin.splitlines()))
+    fuck = "Norme: %s" % relative_path
+    if fuck in errors:
+        errors.remove(fuck)
+    if "Error: 42 header not at top of the file" not in errors:
         header = get_header(path)
-    result = {"errors": errors, "path": path}
+    else:
+        header = None
+    result = {"errors": errors, "path": path, "header": header}
     return result
 
 
 def main(args):
     global folder
-    global users
     global sources
 
     color_init(autoreset=True)
     message("Welcome to the Honeybadger Program Checker")
 
-    folder = Path(args['FOLDER'] or '.').resolve()
+    folder = Path(args["FOLDER"] or ".").resolve()
     message("The folder `%s` will be examinated." % str(folder))
 
     users = auteur_users(folder) + args["--user"]
@@ -184,7 +191,7 @@ def main(args):
     else:
         warning("No usernames availables, headers cannot be checked properly.")
 
-    sources = sorted((s for s in folder.glob('**/*.[ch]') if s.is_file()),
+    sources = sorted((s for s in folder.glob("**/*.[ch]") if s.is_file()),
                      key=lambda p: p.stat().st_size,
                      reverse=True)
     amount_sources = len(sources)
@@ -195,13 +202,31 @@ def main(args):
         message("Found %d source files." % amount_sources)
     else:
         error("No source files were found.")
-    results = map(check_source, sources)
+    pool = Pool(16)
+    results = pool.map(check_source, sources) # Replace by multiprocess map
+    pool.close()
+    pool.join()
     for result in results:
-        message(str(result['path']))
-        for error_message in result['errors']:
+        if result["header"]:
+            message("File %s: (%s | %s | %s)" % (
+                result["path"].relative_to(folder),
+                result["header"]["author"],
+                result["header"]["created_by"],
+                result["header"]["updated_by"],
+                ))
+            if (result["header"]["filename"] != result["path"].name):
+                warning("The header's filename differs in the header")
+            if users and (result["header"]["author"] not in users
+                    or result["header"]["created_by"] not in users
+                    or result["header"]["updated_by"] not in users):
+                error("Login in header differs from allowed authors")
+        else:
+            message("File %s:" % result["path"].relative_to(folder))
+
+        for error_message in result["errors"]:
             error(str(error_message))
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     arguments = docopt(__doc__, version=__version__)
     if not arguments["--changelog"]:
         main(arguments)
