@@ -49,8 +49,14 @@ Options:
 
 """
 
-__version__ = "0.2a"
+__version__ = "0.3"
 __changes__ = """\
+0.3:
+    - Updated get_header
+    - Multithreaded check_source
+    - Added checking for logins in header
+    - Calling make at the end of script
+
 0.2a:
     - Removed useless header parsing
     - Added calls to norminette
@@ -73,13 +79,6 @@ __changes__ = """\
     - Cool Honeybadger header
 """
 
-# User config:
-
-DISPLAY_MESSAGES = True
-
-# End of user config
-
-
 from subprocess import call, Popen, PIPE
 from sys import version_info
 
@@ -93,7 +92,6 @@ if not version_info[:2] == (3, 4):
 
 from multiprocessing.dummy import Pool
 from pathlib import Path
-from pprint import pprint
 import re
 from time import sleep
 
@@ -109,16 +107,17 @@ except ImportError as e:
 
 
 def message(message):
-    if DISPLAY_MESSAGES:
-        print(Fore.GREEN + "[!] " + Fore.RESET + message)
+    print("%s[!]%s %s" % (Back.GREEN, Back.RESET, message))
 
 
 def warning(message):
-    print(Fore.YELLOW + "[W] " + Fore.BLACK + Back.YELLOW + message)
+    print("%s[W]%s %s" % (Back.YELLOW + Fore.BLACK,
+                          Back.RESET + Fore.RESET,
+                          message))
 
 
 def error(message):
-    print(Fore.RED + "[E] " + Fore.RESET + Back.RED + message)
+    print("%s[E]%s %s" % (Back.RED, Back.RESET, message))
 
 
 def auteur_users(folder):
@@ -135,7 +134,8 @@ def auteur_users(folder):
 
 header_regexp = {
     3: re.compile("^/\* {3}(.{50}) :\+: {6}:\+: {4}:\+: {3}\*/$"),
-    5: re.compile("^/\* {3}By: ([a-z-]{3,8}) <.+@.+> {1,30}\+#\+  \+:\+ {7}\+#\+ {8}\*/$"),
+    5: re.compile("^/\* {3}By: ([a-z-]{3,8}) <.+@.+> {1,30}\+#\+  \+:\+ \
+{7}\+#\+ {8}\*/$"),
     7: re.compile("^/\* {3}Created: \d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2} by \
 ([a-z-]{3,8}) {10,15}#\+# {4}#\+# {13}\*/$"),
     8: re.compile("^/\* {3}Updated: \d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2} by \
@@ -143,12 +143,12 @@ header_regexp = {
 }
 
 
-def get_header(path): # TODO
+def get_header(path):
     source = path.open()
     text = source.read().splitlines()
     header = {}
-    header["filename"]   = header_regexp[3].findall(text[3])[0].strip()
-    header["author"]     = header_regexp[5].findall(text[5])[0].strip()
+    header["filename"] = header_regexp[3].findall(text[3])[0].strip()
+    header["author"] = header_regexp[5].findall(text[5])[0].strip()
     header["created_by"] = header_regexp[7].findall(text[7])[0].strip()
     header["updated_by"] = header_regexp[8].findall(text[8])[0].strip()
     source.close()
@@ -159,7 +159,7 @@ def check_source(path):
     relative_path = path.relative_to(Path().resolve())
     proc = Popen(["norminette", str(relative_path)], stdout=PIPE)
     while proc.poll() is None:
-        sleep(0.3)
+        sleep(0.1)
     stdin, _ = proc.communicate()
     errors = list(map(lambda x: x.decode("utf-8"), stdin.splitlines()))
     fuck = "Norme: %s" % relative_path
@@ -198,12 +198,14 @@ def main(args):
     if 0 < amount_sources < 32:
         joined = ", ".join(map(lambda p: str(p.relative_to(folder)), sources))
         message("Found %d source files: %s." % (amount_sources, joined))
+        pool_size = amount_sources
     elif sources:
         message("Found %d source files." % amount_sources)
+        pool_size = 32
     else:
         error("No source files were found.")
-    pool = Pool(16)
-    results = pool.map(check_source, sources) # Replace by multiprocess map
+    pool = Pool(pool_size)  # TODO: Make it faster :(
+    results = pool.map(check_source, sources)
     pool.close()
     pool.join()
     for result in results:
@@ -215,16 +217,25 @@ def main(args):
                 result["header"]["updated_by"],
                 ))
             if (result["header"]["filename"] != result["path"].name):
-                warning("The header's filename differs in the header")
+                error(" -- The header's filename differs in the header")
             if users and (result["header"]["author"] not in users
-                    or result["header"]["created_by"] not in users
-                    or result["header"]["updated_by"] not in users):
-                error("Login in header differs from allowed authors")
+                          or result["header"]["created_by"] not in users
+                          or result["header"]["updated_by"] not in users):
+                error(" -- Login in header differs from allowed authors")
         else:
             message("File %s:" % result["path"].relative_to(folder))
-
         for error_message in result["errors"]:
-            error(str(error_message))
+            error(" --  " + error_message)
+    message("End of script, calling make")
+    if folder == Path(".").resolve():
+        make_args = ["make"]
+    else:
+        make_args = ["make", "-C", str(folder.relative_to(Path().resolve()))]
+    make = Popen(make_args)
+    while make.poll() is None:
+        sleep(0.1)
+    exit(0)
+
 
 if __name__ == "__main__":
     arguments = docopt(__doc__, version=__version__)
